@@ -1762,8 +1762,7 @@ fn version_gt(a: &str, b: &str) -> bool {
 /// The config is read on every call, so toggling the proxy switch takes effect
 /// immediately without restarting the app. The standard [`etlp_core::UA_ETLP`]
 /// user agent is always used — callers must not hand-craft one.
-fn build_proxied_http_client(
-) -> Result<HttpClient, String> {
+fn build_proxied_http_client() -> Result<HttpClient, String> {
     let cfg_dir = platform::config_dir().ok_or_else(err_no_config_dir)?;
     let config = load_or_default_config(&cfg_dir)?;
     HttpClientBuilder::new()
@@ -1773,7 +1772,7 @@ fn build_proxied_http_client(
         .cert_verify(!config.dev.skip_certificate_verify)
         .timeout(std::time::Duration::from_secs(30))
         .build()
-    .map_err(|e| format!("build http client: {e}"))
+        .map_err(|e| format!("build http client: {e}"))
 }
 
 fn build_proxied_download_client() -> Result<reqwest::Client, String> {
