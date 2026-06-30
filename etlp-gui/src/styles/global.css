@@ -1681,6 +1681,32 @@ html[data-center-nav="true"] .sidebar {
     gap: 10px;
 }
 
+/* ── Restore progress modal ─────────────────────────────────────────────── */
+.restore-progress-overlay {
+    cursor: wait;
+}
+.restore-progress-card {
+    width: 410px;
+    padding: 26px 26px 24px;
+    align-items: stretch;
+    text-align: start;
+}
+.restore-progress-card-error {
+    cursor: default;
+}
+.restore-progress-message {
+    margin-bottom: 18px;
+    word-break: normal;
+}
+.restore-progress-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.restore-progress-card .btn {
+    align-self: flex-end;
+}
+
 .cache-size {
     font-size: 13px;
     font-weight: 600;

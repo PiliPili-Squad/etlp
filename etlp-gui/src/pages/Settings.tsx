@@ -131,6 +131,26 @@ function formatBytes(bytes: number): string {
     return `${value.toFixed(value < 10 ? 2 : 1)} ${units[i]}`;
 }
 
+function delay(ms: number): Promise<void> {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function randomBetween(min: number, max: number): number {
+    return min + Math.random() * (max - min);
+}
+
+function mapRestoreError(e: unknown, t: ReturnType<typeof useI18n>): string {
+    const msg = String(e);
+    if (msg.includes("open zip")) return t("cfg_restore_error_read");
+    if (msg.includes("read zip")) return t("cfg_restore_error_zip");
+    if (msg.includes("backup is missing")) return t("cfg_restore_error_missing_config");
+    if (msg.includes("not valid TOML")) return t("cfg_restore_error_invalid_config");
+    if (msg.includes("write config")) return t("cfg_restore_error_write");
+    if (msg.includes("apply restored config")) return t("cfg_restore_error_apply");
+    if (msg.includes("restore task panicked")) return t("cfg_restore_error_internal");
+    return t("cfg_restore_error_generic");
+}
+
 // ── Confirm modal (theme-aware) ──────────────────────────────────────────────────
 
 function ConfirmModal({
@@ -166,6 +186,74 @@ function ConfirmModal({
                         {confirmLabel}
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+type RestoreProgressStatus = "running" | "waiting" | "failed";
+
+interface RestoreProgressState {
+    status: RestoreProgressStatus;
+    progress: number;
+    error?: string;
+}
+
+function RestoreProgressModal({
+    state,
+    onDismiss,
+}: {
+    state: RestoreProgressState;
+    onDismiss: () => void;
+}) {
+    const t = useI18n();
+    const failed = state.status === "failed";
+    return (
+        <div className="modal-overlay restore-progress-overlay">
+            <div
+                className={`modal-card restore-progress-card${
+                    failed ? " restore-progress-card-error" : ""
+                }`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="confirm-title">
+                    {failed
+                        ? t("cfg_restore_failed_title")
+                        : t("cfg_restore_progress_title")}
+                </div>
+                <div className="confirm-message restore-progress-message">
+                    {failed ? state.error : t("cfg_restore_progress_message")}
+                </div>
+
+                {failed ? (
+                    <button className="btn btn-primary" onClick={onDismiss}>
+                        {t("cfg_restore_error_ack")}
+                    </button>
+                ) : (
+                    <div className="restore-progress-body">
+                        <span className="update-progress-label">
+                            {state.status === "waiting"
+                                ? t("cfg_restore_progress_waiting")
+                                : t("cfg_restore_progress_label", {
+                                      progress: Math.round(state.progress),
+                                  })}
+                        </span>
+                        <div
+                            className={`update-progress-track${
+                                state.status === "waiting" ? " indeterminate" : ""
+                            }`}
+                        >
+                            <div
+                                className="update-progress-fill"
+                                style={
+                                    state.status === "running"
+                                        ? { width: `${state.progress}%` }
+                                        : undefined
+                                }
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -1102,7 +1190,8 @@ export default function Settings({
     if (section === "version-prefer")
         return <VersionPreferSection cfg={cfg} update={update} />;
     if (section === "network") return <NetworkSection cfg={cfg} update={update} />;
-    if (section === "config") return <ConfigSection addToast={addToast} />;
+    if (section === "config")
+        return <ConfigSection addToast={addToast} onConfigRestored={loadConfig} />;
     if (section === "bangumi")
         return <BangumiSection cfg={cfg} update={update} addToast={addToast} />;
     if (section === "trakt")
@@ -1432,11 +1521,20 @@ function progressPercent(p: UpdateProgressEvent | null): number | null {
     return Math.min(100, Math.round((p.received / p.total) * 100));
 }
 
-function ConfigSection({ addToast }: { addToast: (msg: string, err?: boolean) => void }) {
+function ConfigSection({
+    addToast,
+    onConfigRestored,
+}: {
+    addToast: (msg: string, err?: boolean) => void;
+    onConfigRestored: () => Promise<void>;
+}) {
     const t = useI18n();
     const [busy, setBusy] = useState(false);
     const [backups, setBackups] = useState<BackupEntry[]>([]);
     const [expanded, setExpanded] = useState(false);
+    const [restoreProgress, setRestoreProgress] = useState<RestoreProgressState | null>(
+        null,
+    );
     // Pending destructive actions awaiting confirmation.
     const [restoreTarget, setRestoreTarget] = useState<BackupEntry | null>(null);
     const [importPath, setImportPath] = useState<string | null>(null);
@@ -1519,14 +1617,43 @@ function ConfigSection({ addToast }: { addToast: (msg: string, err?: boolean) =>
         }
     };
 
+    const runRestoreProgress = async (isCancelled: () => boolean) => {
+        let progress = 0;
+        setRestoreProgress({ status: "running", progress });
+
+        while (progress < 100) {
+            await delay(randomBetween(160, 360));
+            if (isCancelled()) return;
+            progress = Math.min(100, progress + randomBetween(4, 11));
+            setRestoreProgress({ status: "running", progress });
+        }
+
+        if (isCancelled()) return;
+        setRestoreProgress({ status: "waiting", progress: 100 });
+    };
+
     const doRestore = async (path: string) => {
         setBusy(true);
+        setRestoreProgress({ status: "running", progress: 0 });
+        let progressCancelled = false;
+        const restoreTask = invoke("restore_config", { path });
+        const progressTask = runRestoreProgress(() => progressCancelled);
+
         try {
-            await invoke("restore_config", { path });
+            await restoreTask;
+            await progressTask;
+            await onConfigRestored();
             addToast(t("cfg_restore_done"));
             await refreshBackups();
+            setRestoreProgress(null);
         } catch (e) {
-            addToast(mapBackendError(e, t), true);
+            progressCancelled = true;
+            setRestoreProgress({
+                status: "failed",
+                progress: 100,
+                error: mapRestoreError(e, t),
+            });
+            void progressTask;
         } finally {
             setBusy(false);
         }
@@ -1778,6 +1905,13 @@ function ConfigSection({ addToast }: { addToast: (msg: string, err?: boolean) =>
                     danger
                     onConfirm={() => void doReset()}
                     onCancel={() => setConfirmReset(false)}
+                />
+            )}
+
+            {restoreProgress && (
+                <RestoreProgressModal
+                    state={restoreProgress}
+                    onDismiss={() => setRestoreProgress(null)}
                 />
             )}
         </>

@@ -340,6 +340,28 @@ export const en: typeof zhCN = {
     cfg_restore_confirm_title: "Restore Config",
     cfg_restore_confirm_message:
         "Overwrite the current config with backup “{name}”? This cannot be undone.",
+    cfg_restore_progress_title: "Restoring config",
+    cfg_restore_progress_message:
+        "The config is being written and applied to the local service. Keep the app open until this finishes.",
+    cfg_restore_progress_label: "Applying config {progress}%",
+    cfg_restore_progress_waiting: "Finishing config application…",
+    cfg_restore_failed_title: "Restore failed",
+    cfg_restore_error_ack: "OK",
+    cfg_restore_error_read:
+        "The backup file could not be read. Check that it still exists and is accessible.",
+    cfg_restore_error_zip:
+        "The backup file could not be parsed. Choose a valid config backup zip.",
+    cfg_restore_error_missing_config:
+        "The backup is missing config content. Choose the correct backup file.",
+    cfg_restore_error_invalid_config:
+        "The backup config format is invalid. Your current config was not overwritten.",
+    cfg_restore_error_write:
+        "The config could not be written. Check disk space and file permissions, then try again.",
+    cfg_restore_error_apply:
+        "The config was written, but could not be applied to the local service. Restart the app and check the config.",
+    cfg_restore_error_internal:
+        "The restore task stopped unexpectedly. Restart the app and try again.",
+    cfg_restore_error_generic: "The config could not be restored. Try again later.",
     cfg_import_confirm_title: "Import & Restore Config",
     cfg_import_confirm_message:
         "Import this backup and overwrite the current config? This cannot be undone.",

@@ -1636,7 +1636,9 @@ pub async fn restore_config(
     .map_err(|e| format!("restore task panicked: {e}"))??;
     debug!(path = %path, "config restored from backup");
     // Push the restored config into a running server, if any.
-    let _ = reload_config(state).await;
+    reload_config(state)
+        .await
+        .map_err(|e| format!("apply restored config: {e}"))?;
     Ok(())
 }
 
