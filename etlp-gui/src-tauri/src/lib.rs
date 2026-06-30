@@ -6,10 +6,24 @@ pub mod config_patch;
 
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::{Emitter, LogicalSize, Manager, WindowEvent};
+use tauri::{
+    Emitter, LogicalSize, Manager, PhysicalPosition, PhysicalSize, WindowEvent,
+};
 use tauri_plugin_autostart::MacosLauncher;
 
 use commands::GuiState;
+
+const DEFAULT_WINDOW_WIDTH: f64 = 1200.0;
+const DEFAULT_WINDOW_HEIGHT: f64 = 675.0;
+const WINDOW_STATE_FILE: &str = "window-state.json";
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+struct WindowState {
+    width: u32,
+    height: u32,
+    x: Option<i32>,
+    y: Option<i32>,
+}
 
 // ── Language helpers ──────────────────────────────────────────────────────────
 
@@ -316,6 +330,98 @@ fn show_main_window(app: &tauri::AppHandle) {
         let _ = w.show();
         let _ = w.set_focus();
     }
+}
+
+fn window_state_path(app: &tauri::AppHandle) -> Option<std::path::PathBuf> {
+    match app.path().app_config_dir() {
+        Ok(dir) => Some(dir.join(WINDOW_STATE_FILE)),
+        Err(e) => {
+            eprintln!("[etlp] window state dir: {e}");
+            None
+        }
+    }
+}
+
+fn read_window_state(app: &tauri::AppHandle) -> Option<WindowState> {
+    let path = window_state_path(app)?;
+    let body = std::fs::read_to_string(&path).ok()?;
+    serde_json::from_str(&body)
+        .map_err(|e| eprintln!("[etlp] read window state: {e}"))
+        .ok()
+}
+
+fn write_window_state(app: &tauri::AppHandle, state: &WindowState) {
+    let Some(path) = window_state_path(app) else {
+        return;
+    };
+    if let Some(parent) = path.parent()
+        && let Err(e) = std::fs::create_dir_all(parent)
+    {
+        eprintln!("[etlp] create window state dir: {e}");
+        return;
+    }
+    let Ok(body) = serde_json::to_string_pretty(state) else {
+        return;
+    };
+    if let Err(e) = std::fs::write(path, body) {
+        eprintln!("[etlp] write window state: {e}");
+    }
+}
+
+fn restore_window_state(app: &tauri::AppHandle, window: &tauri::WebviewWindow) {
+    let Some(state) = read_window_state(app) else {
+        let _ = window.set_size(LogicalSize::new(
+            DEFAULT_WINDOW_WIDTH,
+            DEFAULT_WINDOW_HEIGHT,
+        ));
+        return;
+    };
+
+    let width = state.width.max(900);
+    let height = state.height.max(650);
+    let _ = window.set_size(PhysicalSize::new(width, height));
+
+    if let (Some(x), Some(y)) = (state.x, state.y)
+        && saved_position_is_visible(window, x, y)
+    {
+        let _ = window.set_position(PhysicalPosition::new(x, y));
+    }
+}
+
+fn saved_position_is_visible(
+    window: &tauri::WebviewWindow,
+    x: i32,
+    y: i32,
+) -> bool {
+    window
+        .available_monitors()
+        .map(|monitors| {
+            monitors.iter().any(|monitor| {
+                let position = monitor.position();
+                let size = monitor.size();
+                let right = position.x.saturating_add_unsigned(size.width);
+                let bottom = position.y.saturating_add_unsigned(size.height);
+                x >= position.x && x < right && y >= position.y && y < bottom
+            })
+        })
+        .unwrap_or(true)
+}
+
+fn persist_window_state(window: &tauri::Window) {
+    let Ok(size) = window.inner_size() else {
+        return;
+    };
+    if size.width < 900 || size.height < 650 {
+        return;
+    }
+    let position = window.outer_position().ok();
+    let state = WindowState {
+        width: size.width,
+        height: size.height,
+        x: position.map(|p| p.x),
+        y: position.map(|p| p.y),
+    };
+    write_window_state(window.app_handle(), &state);
 }
 
 #[cfg(target_os = "macos")]
@@ -670,7 +776,7 @@ pub fn run() {
                 .build(app)?;
 
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_size(LogicalSize::new(1200.0, 675.0));
+                restore_window_state(app.handle(), &window);
                 // Windows owns the frame in React; macOS keeps native traffic
                 // lights and Linux keeps the native frame.
                 apply_window_frame(&window);
@@ -773,13 +879,25 @@ pub fn run() {
             commands::validate_regex,
         ])
         .on_window_event(|window, event| {
-            if let WindowEvent::CloseRequested { api, .. } = event {
-                // Closing the window only hides it — the app keeps running in the
-                // tray. Drop the dock icon too so the dock stays in sync with the
-                // window; it is restored whenever the window is shown again.
-                let _ = window.hide();
-                set_dock_visible(window.app_handle(), false);
-                api.prevent_close();
+            match event {
+                WindowEvent::Resized(_)
+                | WindowEvent::Moved(_)
+                | WindowEvent::ScaleFactorChanged { .. } => {
+                    persist_window_state(window);
+                }
+
+                WindowEvent::CloseRequested { api, .. } => {
+                    // Closing the window only hides it — the app keeps running
+                    // in the tray. Drop the dock icon too so the dock stays in
+                    // sync with the window; it is restored whenever the window
+                    // is shown again.
+                    persist_window_state(window);
+                    let _ = window.hide();
+                    set_dock_visible(window.app_handle(), false);
+                    api.prevent_close();
+                }
+
+                _ => {}
             }
         })
         .run(tauri::generate_context!());
