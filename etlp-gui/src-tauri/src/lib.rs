@@ -4,19 +4,26 @@ pub mod backup;
 pub mod commands;
 pub mod config_patch;
 
+#[cfg(target_os = "macos")]
+use std::sync::Once;
+
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{
-    LogicalSize, Manager, PhysicalPosition, PhysicalSize, WindowEvent,
+    LogicalSize, Manager, PhysicalPosition, PhysicalSize, WebviewUrl,
+    WebviewWindowBuilder, WindowEvent,
 };
 use tauri_plugin_autostart::MacosLauncher;
-use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 
 use commands::GuiState;
 
 const DEFAULT_WINDOW_WIDTH: f64 = 1120.0;
 const DEFAULT_WINDOW_HEIGHT: f64 = 700.0;
+const ABOUT_WINDOW_WIDTH: f64 = 420.0;
+const ABOUT_WINDOW_HEIGHT: f64 = 520.0;
 const WINDOW_STATE_FILE: &str = "window-state.json";
+#[cfg(target_os = "macos")]
+static LIQUID_GLASS_LOG_ONCE: Once = Once::new();
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct WindowState {
@@ -333,24 +340,34 @@ fn show_main_window(app: &tauri::AppHandle) {
     }
 }
 
-fn show_about_dialog(app: &tauri::AppHandle) {
-    let version = app.package_info().version.to_string();
-    let body = if sys_is_chinese() {
-        format!(
-            "版本 {version}\n\n鸣谢 embyToLocalPlayer 带来的无尽灵感\n\n© 2024-2026 PiliPili Team. All rights reserved"
-        )
-    } else {
-        format!(
-            "Version {version}\n\nCredits to embyToLocalPlayer for endless inspiration\n\n© 2024-2026 PiliPili Team. All rights reserved"
-        )
-    };
+fn show_about_window(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("about") {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+        return;
+    }
 
-    app.dialog()
-        .message(body)
-        .title("Genshin")
-        .kind(MessageDialogKind::Info)
-        .buttons(MessageDialogButtons::Ok)
-        .show(|_| {});
+    match WebviewWindowBuilder::new(
+        app,
+        "about",
+        WebviewUrl::App("index.html?view=about".into()),
+    )
+    .title("Genshin")
+    .inner_size(ABOUT_WINDOW_WIDTH, ABOUT_WINDOW_HEIGHT)
+    .resizable(false)
+    .decorations(false)
+    .transparent(true)
+    .shadow(true)
+    .center()
+    .build()
+    {
+        Ok(window) => {
+            apply_window_material(&window);
+            let _ = window.set_focus();
+        }
+        Err(e) => eprintln!("[etlp] about window: {e}"),
+    }
 }
 
 fn window_state_path(app: &tauri::AppHandle) -> Option<std::path::PathBuf> {
@@ -457,18 +474,35 @@ fn is_macos_26_or_newer() -> bool {
 }
 
 #[cfg(target_os = "macos")]
-fn apply_liquid_glass(window: &tauri::WebviewWindow) -> Result<(), String> {
-    use objc2::MainThreadMarker;
-    use objc2_app_kit::{
-        NSAppKitVersionNumber, NSAutoresizingMaskOptions, NSColor,
-        NSGlassEffectView, NSGlassEffectViewStyle, NSView,
-        NSWindowOrderingMode,
-    };
-    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+fn appkit_supports_liquid_glass() -> bool {
+    use objc2_app_kit::NSAppKitVersionNumber;
 
     // SAFETY: AppKit exports this process-wide read-only version number.
     let appkit_version = unsafe { NSAppKitVersionNumber };
-    if appkit_version < 2685.0 {
+    appkit_version >= 2685.0
+}
+
+#[cfg(target_os = "macos")]
+fn log_liquid_glass_support() {
+    LIQUID_GLASS_LOG_ONCE.call_once(|| {
+        tracing::info!(
+            macos26_or_newer = is_macos_26_or_newer(),
+            appkit_supported = appkit_supports_liquid_glass(),
+            "liquid glass support"
+        );
+    });
+}
+
+#[cfg(target_os = "macos")]
+fn apply_liquid_glass(window: &tauri::WebviewWindow) -> Result<(), String> {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{
+        NSAutoresizingMaskOptions, NSColor, NSGlassEffectView,
+        NSGlassEffectViewStyle, NSView, NSWindowOrderingMode,
+    };
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+
+    if !appkit_supports_liquid_glass() {
         return Err("Liquid Glass requires macOS 26.0 or newer".into());
     }
 
@@ -516,6 +550,7 @@ fn apply_liquid_glass(window: &tauri::WebviewWindow) -> Result<(), String> {
 fn apply_window_material(window: &tauri::WebviewWindow) {
     use window_vibrancy::{NSVisualEffectMaterial, apply_vibrancy};
 
+    log_liquid_glass_support();
     if is_macos_26_or_newer() {
         match apply_liquid_glass(window) {
             Ok(()) => return,
@@ -775,7 +810,7 @@ pub fn run() {
                         });
                     }
                     "about" => {
-                        show_about_dialog(app);
+                        show_about_window(app);
                     }
                     "quit" => app.exit(0),
                     _ => {}

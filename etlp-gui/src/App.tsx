@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, type MouseEvent } from "react";
 import { usePlatform } from "./hooks/usePlatform";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useI18n } from "./i18n";
@@ -234,7 +233,7 @@ export interface Toast {
 // the brief placeholder flash. (No freshness concern: it never changes.)
 let cachedVersion: string | null = null;
 
-function AboutModal({ onClose }: { onClose: () => void }) {
+function AboutCard({ onClose }: { onClose: () => void }) {
     const t = useI18n();
     const [version, setVersion] = useState(cachedVersion ?? "0.1.0");
 
@@ -257,91 +256,116 @@ function AboutModal({ onClose }: { onClose: () => void }) {
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div
-                className="modal-card"
-                onClick={(e) => e.stopPropagation()}
-                style={{ position: "relative" }}
-            >
-                <button className="modal-close" onClick={onClose}>
-                    ✕
+        <div
+            className="modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{ position: "relative" }}
+        >
+            <button className="modal-close" onClick={onClose}>
+                ✕
+            </button>
+
+            <img
+                className="about-icon"
+                src="/app-icon.png"
+                alt="etlp icon"
+                onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                }}
+            />
+
+            <div className="about-name">{t("app_name")}</div>
+            <div className="about-version">
+                {t("about_version_label")} {version}
+            </div>
+
+            <div className="about-links">
+                <button
+                    className="about-link-btn"
+                    title="GitHub"
+                    onClick={() => void openLink("https://github.com/PiliPili-Team/etlp")}
+                >
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12c0-5.523-4.477-10-10-10z" />
+                    </svg>
                 </button>
-
-                <img
-                    className="about-icon"
-                    src="/app-icon.png"
-                    alt="etlp icon"
-                    onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                />
-
-                <div className="about-name">{t("app_name")}</div>
-                <div className="about-version">
-                    {t("about_version_label")} {version}
-                </div>
-
-                <div className="about-links">
-                    <button
-                        className="about-link-btn"
-                        title="GitHub"
-                        onClick={() =>
-                            void openLink("https://github.com/PiliPili-Team/etlp")
-                        }
+                <button
+                    className="about-link-btn"
+                    title="Greasy Fork (Tampermonkey)"
+                    onClick={() =>
+                        void openLink("https://greasyfork.org/zh-CN/scripts/584775-etlp")
+                    }
+                >
+                    {/* Tampermonkey userscript icon */}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="22"
+                        height="22"
+                        fill="currentColor"
                     >
-                        <svg
-                            viewBox="0 0 24 24"
-                            width="22"
-                            height="22"
-                            fill="currentColor"
-                        >
-                            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12c0-5.523-4.477-10-10-10z" />
-                        </svg>
-                    </button>
-                    <button
-                        className="about-link-btn"
-                        title="Greasy Fork (Tampermonkey)"
-                        onClick={() =>
-                            void openLink(
-                                "https://greasyfork.org/zh-CN/scripts/584775-etlp",
-                            )
-                        }
-                    >
-                        {/* Tampermonkey userscript icon */}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            width="22"
-                            height="22"
-                            fill="currentColor"
-                        >
-                            <path d="M5.955.002C3-.071.275 2.386.043 5.335c-.069 3.32-.011 6.646-.03 9.969c.06 1.87-.276 3.873.715 5.573c1.083 2.076 3.456 3.288 5.77 3.105c4.003-.011 8.008.022 12.011-.017c2.953-.156 5.478-2.815 5.482-5.772c-.007-4.235.023-8.473-.015-12.708C23.82 2.533 21.16.007 18.205.003c-4.083-.005-8.167 0-12.25-.002zm.447 12.683c2.333-.046 4.506 1.805 4.83 4.116c.412 2.287-1.056 4.716-3.274 5.411c-2.187.783-4.825-.268-5.874-2.341c-1.137-2.039-.52-4.827 1.37-6.197a4.9 4.9 0 0 1 2.948-.99zm11.245 0c2.333-.046 4.505 1.805 4.829 4.116c.413 2.287-1.056 4.716-3.273 5.411c-2.188.783-4.825-.268-5.875-2.341c-1.136-2.039-.52-4.827 1.37-6.197a4.9 4.9 0 0 1 2.949-.99z" />
-                        </svg>
-                    </button>
-                </div>
+                        <path d="M5.955.002C3-.071.275 2.386.043 5.335c-.069 3.32-.011 6.646-.03 9.969c.06 1.87-.276 3.873.715 5.573c1.083 2.076 3.456 3.288 5.77 3.105c4.003-.011 8.008.022 12.011-.017c2.953-.156 5.478-2.815 5.482-5.772c-.007-4.235.023-8.473-.015-12.708C23.82 2.533 21.16.007 18.205.003c-4.083-.005-8.167 0-12.25-.002zm.447 12.683c2.333-.046 4.506 1.805 4.83 4.116c.412 2.287-1.056 4.716-3.274 5.411c-2.187.783-4.825-.268-5.874-2.341c-1.137-2.039-.52-4.827 1.37-6.197a4.9 4.9 0 0 1 2.948-.99zm11.245 0c2.333-.046 4.505 1.805 4.829 4.116c.413 2.287-1.056 4.716-3.273 5.411c-2.188.783-4.825-.268-5.875-2.341c-1.136-2.039-.52-4.827 1.37-6.197a4.9 4.9 0 0 1 2.949-.99z" />
+                    </svg>
+                </button>
+            </div>
 
-                <div className="about-credits">
-                    <div>
-                        {t("about_thanks")}&nbsp;
-                        <a
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                void openLink(
-                                    "https://github.com/kjtsune/embyToLocalPlayer",
-                                );
-                            }}
-                        >
-                            embyToLocalPlayer
-                        </a>
-                        &nbsp;{t("about_thanks_desc")}
-                    </div>
-                    <div style={{ marginTop: 8, fontSize: 11 }}>
-                        © 2024–2026 PiliPili Team. All rights reserved
-                    </div>
+            <div className="about-credits">
+                <div>
+                    {t("about_thanks")}&nbsp;
+                    <a
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            void openLink("https://github.com/kjtsune/embyToLocalPlayer");
+                        }}
+                    >
+                        embyToLocalPlayer
+                    </a>
+                    &nbsp;{t("about_thanks_desc")}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 11 }}>
+                    © 2024–2026 PiliPili Team. All rights reserved
                 </div>
             </div>
         </div>
+    );
+}
+
+function AboutModal({ onClose }: { onClose: () => void }) {
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <AboutCard onClose={onClose} />
+        </div>
+    );
+}
+
+function StandaloneAboutWindow() {
+    const platform = usePlatform();
+
+    useEffect(() => {
+        const platformClass = platform !== "unknown" ? `platform-${platform}` : "";
+        document.body.className = ["about-window-body", platformClass]
+            .filter(Boolean)
+            .join(" ");
+    }, [platform]);
+
+    const closeWindow = useCallback(() => {
+        void getCurrentWindow().close();
+    }, []);
+
+    return (
+        <div className="about-window">
+            <AboutModal onClose={closeWindow} />
+        </div>
+    );
+}
+
+function isStandaloneAboutView(): boolean {
+    const params = new URLSearchParams(window.location.search);
+    return (
+        params.get("view") === "about" ||
+        window.location.hash === "#about" ||
+        window.location.hash === "#/about"
     );
 }
 
@@ -578,17 +602,6 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
         };
     }, []);
 
-    // Listen for tray "About" event
-    useEffect(() => {
-        let unlisten: (() => void) | undefined;
-        listen("show-about", () => setShowAbout(true)).then((fn) => {
-            unlisten = fn;
-        });
-        return () => {
-            unlisten?.();
-        };
-    }, []);
-
     const handleTabChange = useCallback((id: TabId) => {
         setTab(id);
         localStorage.setItem(LAST_TAB_KEY, id);
@@ -753,7 +766,11 @@ export default function App() {
     return (
         <I18nProvider lang={display.lang}>
             <ErrorBoundary>
-                <AppInner display={display} onDisplayChange={updateDisplay} />
+                {isStandaloneAboutView() ? (
+                    <StandaloneAboutWindow />
+                ) : (
+                    <AppInner display={display} onDisplayChange={updateDisplay} />
+                )}
             </ErrorBoundary>
         </I18nProvider>
     );
