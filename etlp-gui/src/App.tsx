@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, type MouseEvent } from "react";
 import { usePlatform } from "./hooks/usePlatform";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useI18n } from "./i18n";
@@ -339,36 +340,6 @@ function AboutModal({ onClose }: { onClose: () => void }) {
     );
 }
 
-function StandaloneAboutWindow() {
-    const platform = usePlatform();
-
-    useEffect(() => {
-        const platformClass = platform !== "unknown" ? `platform-${platform}` : "";
-        document.body.className = ["about-window-body", platformClass]
-            .filter(Boolean)
-            .join(" ");
-    }, [platform]);
-
-    const closeWindow = useCallback(() => {
-        void getCurrentWindow().close();
-    }, []);
-
-    return (
-        <div className="about-window">
-            <AboutModal onClose={closeWindow} />
-        </div>
-    );
-}
-
-function isStandaloneAboutView(): boolean {
-    const params = new URLSearchParams(window.location.search);
-    return (
-        params.get("view") === "about" ||
-        window.location.hash === "#about" ||
-        window.location.hash === "#/about"
-    );
-}
-
 // ── AppInner (consumes i18n context) ────────────────────────────────────────────
 
 type TabId =
@@ -602,6 +573,18 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
         };
     }, []);
 
+    useEffect(() => {
+        let unlisten: (() => void) | undefined;
+        listen("show-about", () => setShowAbout(true))
+            .then((fn) => {
+                unlisten = fn;
+            })
+            .catch(() => {});
+        return () => {
+            unlisten?.();
+        };
+    }, []);
+
     const handleTabChange = useCallback((id: TabId) => {
         setTab(id);
         localStorage.setItem(LAST_TAB_KEY, id);
@@ -766,11 +749,7 @@ export default function App() {
     return (
         <I18nProvider lang={display.lang}>
             <ErrorBoundary>
-                {isStandaloneAboutView() ? (
-                    <StandaloneAboutWindow />
-                ) : (
-                    <AppInner display={display} onDisplayChange={updateDisplay} />
-                )}
+                <AppInner display={display} onDisplayChange={updateDisplay} />
             </ErrorBoundary>
         </I18nProvider>
     );

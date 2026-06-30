@@ -1804,19 +1804,6 @@ body.platform-windows .content {
     color: var(--text);
 }
 
-.about-window {
-    min-height: 100%;
-    background: transparent;
-}
-
-.about-window .modal-overlay {
-    background: transparent;
-}
-
-.about-window .modal-card {
-    max-width: calc(100vw - 32px);
-}
-
 /* ── Confirm modal ─────────────────────────────────────────────────────── */
 .confirm-card {
     width: 380px;
