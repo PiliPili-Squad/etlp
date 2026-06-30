@@ -411,6 +411,16 @@ fn apply_window_material(window: &tauri::WebviewWindow) {
         .unwrap_or_else(|e| eprintln!("[etlp] acrylic: {e}"));
 }
 
+#[cfg(target_os = "windows")]
+fn apply_window_frame(window: &tauri::WebviewWindow) {
+    if let Err(e) = window.set_decorations(false) {
+        eprintln!("[etlp] undecorated window: {e}");
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn apply_window_frame(_window: &tauri::WebviewWindow) {}
+
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
 fn apply_window_material(_window: &tauri::WebviewWindow) {}
 
@@ -660,6 +670,9 @@ pub fn run() {
                 .build(app)?;
 
             if let Some(window) = app.get_webview_window("main") {
+                // Windows owns the frame in React; macOS keeps native traffic
+                // lights and Linux keeps the native frame.
+                apply_window_frame(&window);
                 // ── Window material ───────────────────────────────────────────
                 // macOS uses window-vibrancy directly instead of Tauri's
                 // set_effects(): Tauri's NSVisualEffectView setup changes

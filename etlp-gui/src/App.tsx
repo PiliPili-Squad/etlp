@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type MouseEvent } from "react";
 import { usePlatform } from "./hooks/usePlatform";
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useI18n } from "./i18n";
 import { I18nProvider } from "./i18n/provider";
@@ -137,6 +138,61 @@ function IconConfig() {
     return (
         <svg viewBox="0 0 1024 1024" fill="currentColor" width="18" height="18">
             <path d="M114.11 276.65h474.9c13.49 54.81 63.05 95.59 121.96 95.59s108.47-40.78 121.96-95.59h76.86c16.57 0 30-13.43 30-30s-13.43-30-30-30h-76.86c-13.49-54.81-63.05-95.59-121.96-95.59s-108.47 40.78-121.96 95.59h-474.9c-16.57 0-30 13.43-30 30s13.43 30 30 30z m596.85-95.59c36.17 0 65.59 29.42 65.59 65.59s-29.42 65.59-65.59 65.59-65.59-29.42-65.59-65.59 29.42-65.59 65.59-65.59zM114.11 542h97.06c13.49 54.81 63.04 95.59 121.96 95.59S441.6 596.81 455.09 542h454.8c16.57 0 30-13.43 30-30s-13.43-30-30-30h-454.8c-13.49-54.81-63.04-95.59-121.96-95.59S224.66 427.19 211.17 482h-97.06c-16.57 0-30 13.43-30 30s13.43 30 30 30z m219.02-95.59c36.17 0 65.59 29.42 65.59 65.59s-29.42 65.59-65.59 65.59-65.59-29.42-65.59-65.59 29.42-65.59 65.59-65.59z m576.75 300.94H737.33c-13.49-54.81-63.05-95.59-121.96-95.59s-108.47 40.78-121.96 95.59h-379.3c-16.57 0-30 13.43-30 30s13.43 30 30 30h379.31c13.49 54.81 63.04 95.59 121.96 95.59s108.47-40.78 121.96-95.59h172.55c16.57 0 30-13.43 30-30s-13.43-30-30-30z m-294.51 95.59c-36.17 0-65.59-29.42-65.59-65.59s29.42-65.59 65.59-65.59 65.59 29.42 65.59 65.59-29.42 65.59-65.59 65.59z" />
+        </svg>
+    );
+}
+
+function IconMinimize() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            width="10"
+            height="10"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <path d="M3 8h10" stroke="currentColor" strokeWidth="1.4" />
+        </svg>
+    );
+}
+
+function IconMaximize() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            width="10"
+            height="10"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <rect
+                x="3.5"
+                y="3.5"
+                width="9"
+                height="9"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+            />
+        </svg>
+    );
+}
+
+function IconClose() {
+    return (
+        <svg
+            viewBox="0 0 16 16"
+            width="10"
+            height="10"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <path
+                d="M4 4l8 8M12 4l-8 8"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+            />
         </svg>
     );
 }
@@ -339,6 +395,73 @@ export interface UpdateInfo {
 // newer release appears.
 const UPDATE_DISMISS_KEY = "etlp-update-dismissed";
 
+function BrandBlock() {
+    const t = useI18n();
+
+    return (
+        <div className="brand-block" data-tauri-drag-region>
+            <img className="brand-logo" src="/app-icon.png" alt="" />
+            <span className="brand-name">{t("app_name")}</span>
+        </div>
+    );
+}
+
+function WindowControls() {
+    const win = getCurrentWindow();
+    const runWindowAction =
+        (action: () => Promise<void>) => (event: MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            void action();
+        };
+
+    return (
+        <div
+            className="window-controls"
+            aria-label="Window controls"
+            onDoubleClick={(event) => event.stopPropagation()}
+        >
+            <button
+                type="button"
+                className="window-control"
+                aria-label="Minimize"
+                onClick={runWindowAction(() => win.minimize())}
+            >
+                <IconMinimize />
+            </button>
+            <button
+                type="button"
+                className="window-control"
+                aria-label="Maximize or restore"
+                onClick={runWindowAction(() => win.toggleMaximize())}
+            >
+                <IconMaximize />
+            </button>
+            <button
+                type="button"
+                className="window-control window-control-close"
+                aria-label="Close"
+                onClick={runWindowAction(() => win.close())}
+            >
+                <IconClose />
+            </button>
+        </div>
+    );
+}
+
+function WindowsDragShell() {
+    const win = getCurrentWindow();
+
+    return (
+        <div
+            className="windows-drag-shell"
+            data-tauri-drag-region
+            onDoubleClick={() => void win.toggleMaximize()}
+        >
+            <WindowControls />
+        </div>
+    );
+}
+
 // Whether dotted-numeric version `a` is strictly newer than `b`. Mirrors the
 // backend `version_gt`: compared component by component, non-numeric suffixes
 // ignored, missing trailing components count as zero. Used for the dismiss gate
@@ -453,6 +576,7 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
     }, []);
 
     const isMac = platform === "macos";
+    const isWindows = platform === "windows";
 
     const NAV_SECTIONS = [
         {
@@ -517,18 +641,17 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
                 // (core:window:allow-start-dragging) on mousedown, bypassing
                 // any NSVisualEffectView hit-test interference with the CSS
                 // -webkit-app-region approach.
-                // Only macOS renders this custom bar: Windows already shows a
-                // native title bar with the app icon and name, so a second
-                // in-app one would be a duplicate. The native bar also supplies
-                // the drag region there.
+                // macOS keeps native traffic lights and the established
+                // traffic-light-friendly branding row.
                 <div className="titlebar" data-tauri-drag-region>
-                    <img className="titlebar-logo" src="/app-icon.png" alt="" />
-                    <span className="titlebar-name">{t("app_name")}</span>
+                    <BrandBlock />
                 </div>
             )}
+            {isWindows && <WindowsDragShell />}
 
             <div className="body">
-                <nav className="sidebar">
+                <nav className="sidebar" data-tauri-drag-region>
+                    {!isMac && <BrandBlock />}
                     {NAV_SECTIONS.map((section, si) => (
                         <div key={si}>
                             {section.label && (
