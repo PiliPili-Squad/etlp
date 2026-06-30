@@ -1489,14 +1489,33 @@ body.platform-windows .content {
 .overview-meta {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 10px;
+    gap: 0;
 }
 
 .meta-item {
-    background: var(--overview-meta-bg);
-    border: 1px solid rgba(216, 238, 245, 0.016);
-    border-radius: 12px;
-    padding: 14px 16px;
+    position: relative;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 10px 18px;
+}
+
+.meta-item:first-child {
+    padding-inline-start: 0;
+}
+
+.meta-item + .meta-item::before {
+    content: "";
+    position: absolute;
+    inset-block: 5px;
+    inset-inline-start: 0;
+    width: 1px;
+    background: color-mix(
+        in srgb,
+        var(--overview-meta-bg) 72%,
+        rgba(216, 238, 245, 0.22)
+    );
 }
 
 .meta-label {
