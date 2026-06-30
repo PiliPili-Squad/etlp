@@ -1872,6 +1872,20 @@ fn release_asset_url(
         })
 }
 
+/// Reset the update staging directory before downloading a fresh asset.
+///
+/// A previous interrupted download can leave a partial archive with the same
+/// filename. Removing the whole staging tree first guarantees the following
+/// extraction sees only files from the current update attempt.
+fn reset_update_staging_dir(dir: &std::path::Path) -> Result<(), String> {
+    if dir.exists() {
+        std::fs::remove_dir_all(dir)
+            .map_err(|e| format!("cleanup update directory: {e}"))?;
+    }
+    std::fs::create_dir_all(dir)
+        .map_err(|e| format!("create download directory: {e}"))
+}
+
 /// Check GitHub for the latest release and compare it to the running version.
 ///
 /// Queries the public releases API (no auth needed). Network or parse failures
@@ -2422,9 +2436,12 @@ pub async fn download_and_apply_update(
     let dl_dir = etlp_server::platform::portable_update_dir()
         .unwrap_or_else(|| std::env::temp_dir().join("etlp-update"));
 
-    tokio::fs::create_dir_all(&dl_dir)
-        .await
-        .map_err(|e| format!("create download directory: {e}"))?;
+    let dl_dir_c = dl_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        reset_update_staging_dir(&dl_dir_c)
+    })
+    .await
+    .map_err(|e| format!("cleanup update directory task panicked: {e}"))??;
 
     let dest = dl_dir.join(&filename);
     info!(url = %url, dest = %dest.display(), "downloading update asset");
