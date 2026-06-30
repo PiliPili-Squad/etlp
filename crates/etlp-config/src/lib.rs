@@ -278,7 +278,13 @@ impl Default for GuiSection {
 }
 
 fn default_redirect_uri() -> String {
-    "http://localhost:58000/trakt_auth".to_owned()
+    trakt_redirect_uri(DEFAULT_LISTEN_PORT)
+}
+
+/// Return the local Trakt OAuth callback URI for the given server port.
+#[must_use]
+pub fn trakt_redirect_uri(listen_port: u32) -> String {
+    format!("http://localhost:{listen_port}/trakt_auth")
 }
 
 /// Lower bound (seconds) for the repeated-mark throttle window. Any configured
@@ -772,7 +778,10 @@ speed_dummy = 1.5
         assert_eq!(cfg.server.listen_port, DEFAULT_LISTEN_PORT);
         assert_eq!(cfg.gui.speed_limit_mb, 0);
         assert!(cfg.dev.version_prefer.is_empty());
-        assert_eq!(cfg.trakt.redirect_uri, "http://localhost:58000/trakt_auth");
+        assert_eq!(
+            cfg.trakt.redirect_uri,
+            trakt_redirect_uri(DEFAULT_LISTEN_PORT)
+        );
         assert!(cfg.trakt.enabled);
         assert!(cfg.trakt.user_name.is_empty());
         // A config predating the field migrates to the default window.
@@ -899,6 +908,14 @@ speed_dummy = 1.5
         );
         let cfg = Config::load_from_dir(dir.path()).expect("load high port");
         assert_eq!(cfg.server.listen_port, LISTEN_PORT_MAX);
+    }
+
+    #[test]
+    fn trakt_redirect_uri_follows_listen_port() {
+        assert_eq!(
+            trakt_redirect_uri(58_123),
+            "http://localhost:58123/trakt_auth"
+        );
     }
 
     #[test]

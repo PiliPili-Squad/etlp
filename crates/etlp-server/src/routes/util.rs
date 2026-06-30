@@ -106,7 +106,7 @@ pub async fn trakt_auth(
         };
         let id = cfg.trakt.client_id.clone();
         let secret = cfg.trakt.client_secret.clone();
-        let uri = cfg.trakt.redirect_uri.clone();
+        let uri = etlp_config::trakt_redirect_uri(cfg.server.listen_port);
         let path = state.working_dir.join(etlp_sync::TraktApi::TOKEN_FILE_NAME);
         let proxy = etlp_sync::SyncProxy::new(
             cfg.dev.proxy_http.clone(),

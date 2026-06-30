@@ -1061,9 +1061,11 @@ pub async fn refresh_trakt_auth(
             let cfg_dir =
                 platform::config_dir().ok_or_else(err_no_config_dir)?;
             let config = load_or_default_config(&cfg_dir)?;
+            let redirect_uri =
+                etlp_config::trakt_redirect_uri(config.server.listen_port);
             let url = etlp_sync::trakt_authorize_url(
                 &config.trakt.client_id,
-                &config.trakt.redirect_uri,
+                &redirect_uri,
             );
             info!("refresh_trakt_auth: no valid token, opening authorize page");
             app.opener()

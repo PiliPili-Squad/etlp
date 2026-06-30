@@ -1211,7 +1211,7 @@ async fn sync_trakt(state: &SharedState, entries: &[SyncEntry<'_>]) {
             cfg.trakt.client_id.clone(),
             cfg.trakt.client_secret.clone(),
             cfg.trakt.user_name.clone(),
-            cfg.trakt.redirect_uri.clone(),
+            etlp_config::trakt_redirect_uri(cfg.server.listen_port),
             cfg.trakt.enable_host.clone(),
             cfg.trakt.allow_duplicate,
             cfg.trakt.duplicate_throttle(),
