@@ -15,7 +15,7 @@ use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use commands::GuiState;
 
 const DEFAULT_WINDOW_WIDTH: f64 = 1120.0;
-const DEFAULT_WINDOW_HEIGHT: f64 = 630.0;
+const DEFAULT_WINDOW_HEIGHT: f64 = 700.0;
 const WINDOW_STATE_FILE: &str = "window-state.json";
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]

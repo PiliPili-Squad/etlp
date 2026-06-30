@@ -67,16 +67,16 @@
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
         color-scheme: dark;
-        --window-bg: rgba(25, 28, 37, 0.9);
-        --window-tint: rgba(28, 32, 42, 0.74);
-        --pane-bg: rgba(24, 27, 35, 0.86);
-        --sidebar-bg: rgba(35, 40, 52, 0.9);
+        --window-bg: rgba(28, 31, 40, 0.9);
+        --window-tint: rgba(31, 35, 45, 0.74);
+        --pane-bg: rgba(27, 30, 38, 0.86);
+        --sidebar-bg: rgba(38, 43, 55, 0.9);
         --pane-border: rgba(216, 238, 245, 0.022);
         --bg: var(--window-bg);
-        --surface: rgba(23, 26, 34, 0.84);
-        --surface-alt: rgba(27, 31, 40, 0.7);
+        --surface: rgba(26, 29, 37, 0.84);
+        --surface-alt: rgba(30, 34, 43, 0.7);
         --surface-hover: rgba(255, 255, 255, 0.062);
-        --surface-strong: rgba(24, 27, 35, 0.9);
+        --surface-strong: rgba(27, 30, 38, 0.9);
         --bg-2: var(--surface-alt);
         --bg-hover: var(--surface-hover);
         --bg-input: rgba(10, 16, 22, 0.36);
@@ -109,16 +109,16 @@
 /* ── Dark theme (explicit override) ────────────────────────────────── */
 :root[data-theme="dark"] {
     color-scheme: dark;
-    --window-bg: rgba(25, 28, 37, 0.9);
-    --window-tint: rgba(28, 32, 42, 0.74);
-    --pane-bg: rgba(24, 27, 35, 0.86);
-    --sidebar-bg: rgba(35, 40, 52, 0.9);
+    --window-bg: rgba(28, 31, 40, 0.9);
+    --window-tint: rgba(31, 35, 45, 0.74);
+    --pane-bg: rgba(27, 30, 38, 0.86);
+    --sidebar-bg: rgba(38, 43, 55, 0.9);
     --pane-border: rgba(216, 238, 245, 0.022);
     --bg: var(--window-bg);
-    --surface: rgba(23, 26, 34, 0.84);
-    --surface-alt: rgba(27, 31, 40, 0.7);
+    --surface: rgba(26, 29, 37, 0.84);
+    --surface-alt: rgba(30, 34, 43, 0.7);
     --surface-hover: rgba(255, 255, 255, 0.062);
-    --surface-strong: rgba(24, 27, 35, 0.9);
+    --surface-strong: rgba(27, 30, 38, 0.9);
     --bg-2: var(--surface-alt);
     --bg-hover: var(--surface-hover);
     --bg-input: rgba(10, 16, 22, 0.36);
@@ -186,16 +186,16 @@ body.platform-macos .app {
 }
 
 .app.window-focused {
-    --window-bg: rgba(25, 28, 37, 0.92);
-    --window-tint: rgba(28, 32, 42, 0.76);
-    --pane-bg: rgba(24, 27, 35, 0.88);
+    --window-bg: rgba(28, 31, 40, 0.92);
+    --window-tint: rgba(31, 35, 45, 0.76);
+    --pane-bg: rgba(27, 30, 38, 0.88);
     box-shadow: inset 0 0 0 1px rgba(216, 238, 245, 0.02);
 }
 
 .app.window-blurred {
-    --window-bg: rgba(21, 24, 32, 0.94);
-    --window-tint: rgba(24, 27, 36, 0.78);
-    --pane-bg: rgba(21, 24, 32, 0.9);
+    --window-bg: rgba(24, 27, 35, 0.94);
+    --window-tint: rgba(27, 30, 39, 0.78);
+    --pane-bg: rgba(24, 27, 35, 0.9);
     box-shadow: inset 0 0 0 1px rgba(216, 238, 245, 0.012);
     filter: brightness(0.93) saturate(0.92);
 }
