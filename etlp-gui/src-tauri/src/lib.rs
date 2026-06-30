@@ -7,14 +7,15 @@ pub mod config_patch;
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{
-    Emitter, LogicalSize, Manager, PhysicalPosition, PhysicalSize, WindowEvent,
+    LogicalSize, Manager, PhysicalPosition, PhysicalSize, WindowEvent,
 };
 use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 
 use commands::GuiState;
 
-const DEFAULT_WINDOW_WIDTH: f64 = 1200.0;
-const DEFAULT_WINDOW_HEIGHT: f64 = 675.0;
+const DEFAULT_WINDOW_WIDTH: f64 = 1120.0;
+const DEFAULT_WINDOW_HEIGHT: f64 = 630.0;
 const WINDOW_STATE_FILE: &str = "window-state.json";
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
@@ -330,6 +331,26 @@ fn show_main_window(app: &tauri::AppHandle) {
         let _ = w.show();
         let _ = w.set_focus();
     }
+}
+
+fn show_about_dialog(app: &tauri::AppHandle) {
+    let version = app.package_info().version.to_string();
+    let body = if sys_is_chinese() {
+        format!(
+            "版本 {version}\n\n鸣谢 embyToLocalPlayer 带来的无尽灵感\n\n© 2024-2026 PiliPili Team. All rights reserved"
+        )
+    } else {
+        format!(
+            "Version {version}\n\nCredits to embyToLocalPlayer for endless inspiration\n\n© 2024-2026 PiliPili Team. All rights reserved"
+        )
+    };
+
+    app.dialog()
+        .message(body)
+        .title("Genshin")
+        .kind(MessageDialogKind::Info)
+        .buttons(MessageDialogButtons::Ok)
+        .show(|_| {});
 }
 
 fn window_state_path(app: &tauri::AppHandle) -> Option<std::path::PathBuf> {
@@ -754,8 +775,7 @@ pub fn run() {
                         });
                     }
                     "about" => {
-                        show_main_window(app);
-                        app.emit("show-about", ()).ok();
+                        show_about_dialog(app);
                     }
                     "quit" => app.exit(0),
                     _ => {}
