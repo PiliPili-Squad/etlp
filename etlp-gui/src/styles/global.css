@@ -67,26 +67,16 @@
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
         color-scheme: dark;
-        --window-bg: rgba(22, 25, 33, 0.9);
-        --window-tint: rgba(25, 29, 39, 0.74);
-        --pane-bg: rgba(21, 24, 31, 0.86);
-        --sidebar-bg: linear-gradient(
-            145deg,
-            rgba(32, 36, 46, 0.92) 0%,
-            rgba(32, 37, 49, 0.88) 44%,
-            rgba(27, 28, 37, 0.9) 100%
-        );
+        --window-bg: rgba(25, 28, 37, 0.9);
+        --window-tint: rgba(28, 32, 42, 0.74);
+        --pane-bg: rgba(24, 27, 35, 0.86);
+        --sidebar-bg: rgba(35, 40, 52, 0.9);
         --pane-border: rgba(216, 238, 245, 0.022);
         --bg: var(--window-bg);
-        --surface: rgba(20, 23, 30, 0.84);
-        --surface-alt: rgba(24, 28, 36, 0.7);
+        --surface: rgba(23, 26, 34, 0.84);
+        --surface-alt: rgba(27, 31, 40, 0.7);
         --surface-hover: rgba(255, 255, 255, 0.062);
-        --surface-strong: linear-gradient(
-            145deg,
-            rgba(24, 27, 35, 0.9) 0%,
-            rgba(21, 24, 31, 0.88) 52%,
-            rgba(19, 22, 29, 0.9) 100%
-        );
+        --surface-strong: rgba(24, 27, 35, 0.9);
         --bg-2: var(--surface-alt);
         --bg-hover: var(--surface-hover);
         --bg-input: rgba(10, 16, 22, 0.36);
@@ -119,26 +109,16 @@
 /* ── Dark theme (explicit override) ────────────────────────────────── */
 :root[data-theme="dark"] {
     color-scheme: dark;
-    --window-bg: rgba(22, 25, 33, 0.9);
-    --window-tint: rgba(25, 29, 39, 0.74);
-    --pane-bg: rgba(21, 24, 31, 0.86);
-    --sidebar-bg: linear-gradient(
-        145deg,
-        rgba(32, 36, 46, 0.92) 0%,
-        rgba(32, 37, 49, 0.88) 44%,
-        rgba(27, 28, 37, 0.9) 100%
-    );
+    --window-bg: rgba(25, 28, 37, 0.9);
+    --window-tint: rgba(28, 32, 42, 0.74);
+    --pane-bg: rgba(24, 27, 35, 0.86);
+    --sidebar-bg: rgba(35, 40, 52, 0.9);
     --pane-border: rgba(216, 238, 245, 0.022);
     --bg: var(--window-bg);
-    --surface: rgba(20, 23, 30, 0.84);
-    --surface-alt: rgba(24, 28, 36, 0.7);
+    --surface: rgba(23, 26, 34, 0.84);
+    --surface-alt: rgba(27, 31, 40, 0.7);
     --surface-hover: rgba(255, 255, 255, 0.062);
-    --surface-strong: linear-gradient(
-        145deg,
-        rgba(24, 27, 35, 0.9) 0%,
-        rgba(21, 24, 31, 0.88) 52%,
-        rgba(19, 22, 29, 0.9) 100%
-    );
+    --surface-strong: rgba(24, 27, 35, 0.9);
     --bg-2: var(--surface-alt);
     --bg-hover: var(--surface-hover);
     --bg-input: rgba(10, 16, 22, 0.36);
@@ -206,16 +186,16 @@ body.platform-macos .app {
 }
 
 .app.window-focused {
-    --window-bg: rgba(22, 25, 33, 0.92);
-    --window-tint: rgba(25, 29, 39, 0.76);
-    --pane-bg: rgba(21, 24, 31, 0.88);
+    --window-bg: rgba(25, 28, 37, 0.92);
+    --window-tint: rgba(28, 32, 42, 0.76);
+    --pane-bg: rgba(24, 27, 35, 0.88);
     box-shadow: inset 0 0 0 1px rgba(216, 238, 245, 0.02);
 }
 
 .app.window-blurred {
-    --window-bg: rgba(18, 21, 28, 0.94);
-    --window-tint: rgba(21, 24, 32, 0.78);
-    --pane-bg: rgba(18, 21, 28, 0.9);
+    --window-bg: rgba(21, 24, 32, 0.94);
+    --window-tint: rgba(24, 27, 36, 0.78);
+    --pane-bg: rgba(21, 24, 32, 0.9);
     box-shadow: inset 0 0 0 1px rgba(216, 238, 245, 0.012);
     filter: brightness(0.93) saturate(0.92);
 }
