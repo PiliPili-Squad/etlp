@@ -318,6 +318,44 @@ fn show_main_window(app: &tauri::AppHandle) {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn is_macos_26_or_newer() -> bool {
+    std::process::Command::new("sw_vers")
+        .arg("-productVersion")
+        .output()
+        .ok()
+        .and_then(|out| String::from_utf8(out.stdout).ok())
+        .and_then(|version| version.split('.').next()?.parse::<u32>().ok())
+        .is_some_and(|major| major >= 26)
+}
+
+#[cfg(target_os = "macos")]
+fn apply_window_material(window: &tauri::WebviewWindow) {
+    use window_vibrancy::{NSVisualEffectMaterial, apply_vibrancy};
+
+    // macOS Tahoe 26's Liquid Glass is applied by the system to semantic
+    // materials. Keep older systems on Sidebar to preserve the current look.
+    let material = if is_macos_26_or_newer() {
+        NSVisualEffectMaterial::HeaderView
+    } else {
+        NSVisualEffectMaterial::Sidebar
+    };
+    apply_vibrancy(window, material, None, Some(12.0))
+        .unwrap_or_else(|e| eprintln!("[etlp] vibrancy: {e}"));
+}
+
+#[cfg(target_os = "windows")]
+fn apply_window_material(window: &tauri::WebviewWindow) {
+    // Match the macOS translucent sidebar treatment with native Windows
+    // acrylic. Blur is a compatibility fallback for older Windows builds.
+    window_vibrancy::apply_acrylic(window, Some((242, 242, 247, 160)))
+        .or_else(|_| window_vibrancy::apply_blur(window, Some((242, 242, 247, 120))))
+        .unwrap_or_else(|e| eprintln!("[etlp] acrylic: {e}"));
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
+fn apply_window_material(_window: &tauri::WebviewWindow) {}
+
 // ── Windows UAC elevation ─────────────────────────────────────────────────────
 
 /// Check whether `portable.bin` is present alongside the exe but the directory
@@ -564,24 +602,13 @@ pub fn run() {
                 .build(app)?;
 
             if let Some(window) = app.get_webview_window("main") {
-                // ── macOS vibrancy ─────────────────────────────────────────────
+                // ── Window material ───────────────────────────────────────────
                 // Pin to window-vibrancy 0.6 (same version bundled in tauri
                 // 2.11.3) so Cargo deduplicates to a single copy — no multiply-
-                // defined symbol. Tauri's set_effects() sets NSVisualEffectView
-                // interactionType differently and breaks CSS drag regions.
-                #[cfg(target_os = "macos")]
-                {
-                    use window_vibrancy::{
-                        NSVisualEffectMaterial, apply_vibrancy,
-                    };
-                    apply_vibrancy(
-                        &window,
-                        NSVisualEffectMaterial::Sidebar,
-                        None,
-                        Some(12.0),
-                    )
-                    .unwrap_or_else(|e| eprintln!("[etlp] vibrancy: {e}"));
-                }
+                // defined symbol. On macOS we keep using window-vibrancy instead
+                // of Tauri's set_effects(): Tauri's NSVisualEffectView setup
+                // changes hit-testing and breaks the custom drag region.
+                apply_window_material(&window);
                 // Show the main window on launch; tauri.conf.json sets
                 // visible:false so the OS doesn't flash an unstyled frame.
                 // When silent start is enabled the window stays hidden and the

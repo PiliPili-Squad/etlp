@@ -159,6 +159,44 @@ body.platform-macos .app {
    straight system border. */
 body.platform-windows .app {
     border-radius: 0;
+    background: rgba(242, 242, 247, 0.72);
+}
+
+body.platform-windows .sidebar,
+body.platform-windows .titlebar {
+    background: rgba(246, 246, 250, 0.68);
+}
+
+body.platform-windows .content {
+    background: rgba(242, 242, 247, 0.82);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body.platform-windows .app {
+        background: rgba(13, 13, 15, 0.72);
+    }
+
+    :root:not([data-theme="light"]) body.platform-windows .sidebar,
+    :root:not([data-theme="light"]) body.platform-windows .titlebar {
+        background: rgba(28, 28, 30, 0.66);
+    }
+
+    :root:not([data-theme="light"]) body.platform-windows .content {
+        background: rgba(13, 13, 15, 0.84);
+    }
+}
+
+:root[data-theme="dark"] body.platform-windows .app {
+    background: rgba(13, 13, 15, 0.72);
+}
+
+:root[data-theme="dark"] body.platform-windows .sidebar,
+:root[data-theme="dark"] body.platform-windows .titlebar {
+    background: rgba(28, 28, 30, 0.66);
+}
+
+:root[data-theme="dark"] body.platform-windows .content {
+    background: rgba(13, 13, 15, 0.84);
 }
 
 /* ── Titlebar ────────────────────────────────────────────────────────── */
