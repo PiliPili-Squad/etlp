@@ -375,6 +375,8 @@ export const he: typeof zhCN = {
     sys_brand_logo: "הצג אזור מותג",
     sys_brand_logo_desc:
         "כאשר כבוי, לוגו ושם המותג מעל הלשוניות מוסתרים והתפריט עולה אוטומטית",
+    sys_brand_name: "שם מותג",
+    sys_brand_name_desc: "השאר ריק כדי להשתמש אוטומטית בשם המותג המקומי המובנה",
     sys_material_opacity: "אטימות חומר",
     sys_material_opacity_desc:
         "ערכים נמוכים הופכים רקעים וכרטיסים לשקופים יותר בלי לעמעם את הטקסט",

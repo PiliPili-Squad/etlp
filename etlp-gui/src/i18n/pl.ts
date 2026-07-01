@@ -399,6 +399,9 @@ export const pl: typeof zhCN = {
     sys_brand_logo: "Pokaż obszar marki",
     sys_brand_logo_desc:
         "Ukrywa logo i nazwę nad kartami; menu automatycznie przesuwa się w górę",
+    sys_brand_name: "Nazwa marki",
+    sys_brand_name_desc:
+        "Zostaw puste, aby automatycznie użyć wbudowanej zlokalizowanej nazwy",
     sys_material_opacity: "Nieprzezroczystość materiału",
     sys_material_opacity_desc:
         "Niższe wartości zwiększają przezroczystość tła i kart bez wygaszania tekstu",

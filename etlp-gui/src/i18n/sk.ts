@@ -394,6 +394,9 @@ export const sk: typeof zhCN = {
     sys_brand_logo: "Zobraziť oblasť značky",
     sys_brand_logo_desc:
         "Skryje logo a názov nad kartami; ponuka sa automaticky posunie nahor",
+    sys_brand_name: "Názov značky",
+    sys_brand_name_desc:
+        "Nechajte prázdne, ak chcete automaticky použiť vstavaný lokalizovaný názov",
     sys_material_opacity: "Priehľadnosť materiálu",
     sys_material_opacity_desc:
         "Nižšie hodnoty spriehľadnia pozadia a karty bez vyblednutia textu",

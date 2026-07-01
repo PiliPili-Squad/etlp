@@ -379,6 +379,8 @@ export const zhCN = {
     sys_accent_desc: "界面强调色，影响按钮、激活态及徽章颜色",
     sys_brand_logo: "显示品牌区域",
     sys_brand_logo_desc: "关闭后隐藏 Tab 上方的品牌 Logo 和名称，菜单会自动上移",
+    sys_brand_name: "品牌名称",
+    sys_brand_name_desc: "留空时自动使用内置多语言品牌名",
     sys_material_opacity: "材质透明度",
     sys_material_opacity_desc: "调低后背景和卡片会更透，不影响文字透明度",
     sys_material_blur: "磨砂质感",

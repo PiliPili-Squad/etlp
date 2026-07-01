@@ -2310,6 +2310,13 @@ function SystemSection({
                     checked={display.showBrandLogo ?? true}
                     onChange={(v) => onDisplayChange({ showBrandLogo: v })}
                 />
+                <InputRow
+                    label={t("sys_brand_name")}
+                    desc={t("sys_brand_name_desc")}
+                    value={display.customBrandName ?? ""}
+                    placeholder={t("app_name")}
+                    onCommit={(v) => onDisplayChange({ customBrandName: v.trim() })}
+                />
                 <SliderRow
                     label={t("sys_material_opacity")}
                     desc={t("sys_material_opacity_desc")}

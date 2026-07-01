@@ -382,6 +382,8 @@ export const ko: typeof zhCN = {
     sys_brand_logo: "브랜드 영역 표시",
     sys_brand_logo_desc:
         "끄면 탭 위의 브랜드 로고와 이름을 숨기고 메뉴가 자동으로 위로 이동합니다",
+    sys_brand_name: "브랜드 이름",
+    sys_brand_name_desc: "비워 두면 내장된 다국어 브랜드 이름을 자동으로 사용합니다",
     sys_material_opacity: "재질 투명도",
     sys_material_opacity_desc:
         "값을 낮추면 배경과 카드가 더 투명해지며 텍스트 투명도는 변하지 않습니다",

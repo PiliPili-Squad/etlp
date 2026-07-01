@@ -382,6 +382,8 @@ export const ja: typeof zhCN = {
     sys_brand_logo: "ブランド領域を表示",
     sys_brand_logo_desc:
         "オフにするとタブ上部のブランドロゴと名前を隠し、メニューは自動的に上へ移動します",
+    sys_brand_name: "ブランド名",
+    sys_brand_name_desc: "空のままにすると内蔵の多言語ブランド名を自動的に使用します",
     sys_material_opacity: "マテリアル透明度",
     sys_material_opacity_desc:
         "値を下げると背景とカードがより透け、文字の透明度は変わりません",

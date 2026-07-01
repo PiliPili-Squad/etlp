@@ -368,6 +368,8 @@ export const zhTW: typeof zhCN = {
     sys_accent_desc: "介面強調色，影響按鈕、啟用狀態及徽章顏色",
     sys_brand_logo: "顯示品牌區域",
     sys_brand_logo_desc: "關閉後隱藏 Tab 上方的品牌 Logo 和名稱，選單會自動上移",
+    sys_brand_name: "品牌名稱",
+    sys_brand_name_desc: "留空時自動使用內建多語言品牌名",
     sys_material_opacity: "材質透明度",
     sys_material_opacity_desc: "調低後背景和卡片會更透，不影響文字透明度",
     sys_material_blur: "磨砂質感",

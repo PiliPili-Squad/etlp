@@ -389,6 +389,9 @@ export const tr: typeof zhCN = {
     sys_brand_logo: "Marka alanını göster",
     sys_brand_logo_desc:
         "Sekmelerin üstündeki marka logosunu ve adını gizler; menü otomatik olarak yukarı çıkar",
+    sys_brand_name: "Marka Adı",
+    sys_brand_name_desc:
+        "Yerleşik yerelleştirilmiş marka adını otomatik kullanmak için boş bırakın",
     sys_material_opacity: "Malzeme Opaklığı",
     sys_material_opacity_desc:
         "Düşük değerler metni soldurmadan arka planları ve kartları daha şeffaf yapar",

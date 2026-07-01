@@ -234,7 +234,7 @@ export interface Toast {
 // the brief placeholder flash. (No freshness concern: it never changes.)
 let cachedVersion: string | null = null;
 
-function AboutCard({ onClose }: { onClose: () => void }) {
+function AboutCard({ brandName, onClose }: { brandName: string; onClose: () => void }) {
     const t = useI18n();
     const [version, setVersion] = useState(cachedVersion ?? "0.1.0");
 
@@ -275,7 +275,7 @@ function AboutCard({ onClose }: { onClose: () => void }) {
                 }}
             />
 
-            <div className="about-name">{t("app_name")}</div>
+            <div className="about-name">{brandName}</div>
             <div className="about-version">
                 {t("about_version_label")} {version}
             </div>
@@ -332,10 +332,10 @@ function AboutCard({ onClose }: { onClose: () => void }) {
     );
 }
 
-function AboutModal({ onClose }: { onClose: () => void }) {
+function AboutModal({ brandName, onClose }: { brandName: string; onClose: () => void }) {
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <AboutCard onClose={onClose} />
+            <AboutCard brandName={brandName} onClose={onClose} />
         </div>
     );
 }
@@ -397,13 +397,11 @@ interface ShellConfig {
 const UPDATE_DISMISS_KEY = "etlp-update-dismissed";
 const AUTO_UPDATE_CHECK_DELAY_MS = 120_000;
 
-function BrandBlock() {
-    const t = useI18n();
-
+function BrandBlock({ brandName }: { brandName: string }) {
     return (
         <div className="brand-block" data-tauri-drag-region>
             <img className="brand-logo" src="/app-icon.png" alt="" />
-            <span className="brand-name">{t("app_name")}</span>
+            <span className="brand-name">{brandName}</span>
         </div>
     );
 }
@@ -506,6 +504,7 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
     const [windowFocused, setWindowFocused] = useState(true);
     const [liquidGlassEnabled, setLiquidGlassEnabled] = useState(false);
     const toastIdRef = useRef(0);
+    const brandName = display.customBrandName.trim() || t("app_name");
 
     // Auto update check: runs once per app launch (independent of the active
     // tab), gated by the user's `check_update` setting (default on). It is
@@ -691,14 +690,16 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
                 // macOS keeps native traffic lights and the established
                 // traffic-light-friendly branding row.
                 <div className="titlebar" data-tauri-drag-region>
-                    <BrandBlock />
+                    <BrandBlock brandName={brandName} />
                 </div>
             )}
             {isWindows && <WindowsDragShell />}
 
             <div className="body">
                 <nav className="sidebar" data-tauri-drag-region>
-                    {!isMac && display.showBrandLogo && <BrandBlock />}
+                    {!isMac && display.showBrandLogo && (
+                        <BrandBlock brandName={brandName} />
+                    )}
                     {NAV_SECTIONS.map((section, si) => (
                         <div key={si}>
                             {section.label && (
@@ -754,7 +755,9 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
                 ))}
             </div>
 
-            {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+            {showAbout && (
+                <AboutModal brandName={brandName} onClose={() => setShowAbout(false)} />
+            )}
         </div>
     );
 }

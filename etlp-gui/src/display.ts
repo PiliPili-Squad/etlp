@@ -80,6 +80,7 @@ export interface DisplaySettings {
     fontFamily: string;
     accentColor: AccentColor;
     showBrandLogo: boolean;
+    customBrandName: string;
     materialOpacity: number;
     materialBlur: number;
     /** Deprecated local preference. Always coerced to false on load. */
@@ -107,6 +108,7 @@ export function defaultDisplay(): DisplaySettings {
         fontFamily: "",
         accentColor: "blue",
         showBrandLogo: true,
+        customBrandName: "",
         materialOpacity: 100,
         materialBlur: 7,
         centerNav: false,
@@ -126,6 +128,10 @@ export function loadDisplay(): DisplaySettings {
             const parsed = { ...defaultDisplay(), ...JSON.parse(raw) };
             return {
                 ...parsed,
+                customBrandName:
+                    typeof parsed.customBrandName === "string"
+                        ? parsed.customBrandName
+                        : "",
                 materialOpacity: clampNumber(parsed.materialOpacity, 45, 100, 100),
                 materialBlur: clampNumber(parsed.materialBlur, 0, 18, 7),
                 centerNav: false,

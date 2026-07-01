@@ -406,6 +406,9 @@ export const fr: typeof zhCN = {
     sys_brand_logo: "Afficher l’en-tête de marque",
     sys_brand_logo_desc:
         "Masque le logo et le nom au-dessus des onglets ; le menu remonte automatiquement",
+    sys_brand_name: "Nom de marque",
+    sys_brand_name_desc:
+        "Laisser vide pour utiliser automatiquement le nom localisé intégré",
     sys_material_opacity: "Opacité du matériau",
     sys_material_opacity_desc:
         "Des valeurs plus basses rendent les fonds et cartes plus transparents sans atténuer le texte",

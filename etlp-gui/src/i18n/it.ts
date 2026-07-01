@@ -398,6 +398,9 @@ export const it: typeof zhCN = {
     sys_brand_logo: "Mostra area del brand",
     sys_brand_logo_desc:
         "Nasconde logo e nome sopra le schede; il menu sale automaticamente",
+    sys_brand_name: "Nome del brand",
+    sys_brand_name_desc:
+        "Lascia vuoto per usare automaticamente il nome localizzato integrato",
     sys_material_opacity: "Opacità materiale",
     sys_material_opacity_desc:
         "Valori più bassi rendono sfondi e schede più trasparenti senza sbiadire il testo",

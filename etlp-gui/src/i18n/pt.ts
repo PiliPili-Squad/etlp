@@ -399,6 +399,9 @@ export const pt: typeof zhCN = {
     sys_brand_logo: "Mostrar área da marca",
     sys_brand_logo_desc:
         "Oculta o logótipo e o nome acima dos separadores; o menu sobe automaticamente",
+    sys_brand_name: "Nome da marca",
+    sys_brand_name_desc:
+        "Deixe vazio para usar automaticamente o nome localizado integrado",
     sys_material_opacity: "Opacidade do material",
     sys_material_opacity_desc:
         "Valores mais baixos tornam fundos e cartões mais transparentes sem desvanecer o texto",

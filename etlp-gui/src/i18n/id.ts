@@ -394,6 +394,9 @@ export const id: typeof zhCN = {
     sys_brand_logo: "Tampilkan Area Merek",
     sys_brand_logo_desc:
         "Menyembunyikan logo dan nama merek di atas tab; menu otomatis naik",
+    sys_brand_name: "Nama Merek",
+    sys_brand_name_desc:
+        "Biarkan kosong untuk otomatis memakai nama merek bawaan yang dilokalkan",
     sys_material_opacity: "Opasitas Material",
     sys_material_opacity_desc:
         "Nilai lebih rendah membuat latar dan kartu lebih transparan tanpa memudarkan teks",
