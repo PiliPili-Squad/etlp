@@ -18,6 +18,7 @@
     --material-opacity: 1;
     --material-opacity-percent: 100%;
     --material-blur: 7px;
+    --material-surface: rgba(224, 232, 236, 0.74);
 
     --window-bg: rgba(218, 226, 231, 0.72);
     --window-tint: rgba(224, 232, 236, 0.56);
@@ -73,6 +74,7 @@
         --window-bg: rgba(31, 36, 49, 0.72);
         --window-tint: rgba(31, 36, 49, 0.48);
         --pane-bg: rgba(31, 36, 49, 0.58);
+        --material-surface: rgba(31, 36, 49, 0.86);
         --sidebar-bg: var(--pane-bg);
         --pane-border: rgba(216, 238, 245, 0.03);
         --bg: var(--window-bg);
@@ -115,6 +117,7 @@
     --window-bg: rgba(31, 36, 49, 0.72);
     --window-tint: rgba(31, 36, 49, 0.48);
     --pane-bg: rgba(31, 36, 49, 0.58);
+    --material-surface: rgba(31, 36, 49, 0.86);
     --sidebar-bg: var(--pane-bg);
     --pane-border: rgba(216, 238, 245, 0.03);
     --bg: var(--window-bg);
@@ -393,11 +396,10 @@ body:not(.platform-macos) .titlebar {
     min-height: 0;
     background: color-mix(
         in srgb,
-        var(--sidebar-bg) var(--material-opacity-percent),
+        var(--material-surface) var(--material-opacity-percent),
         transparent
     );
-    backdrop-filter: blur(var(--material-blur));
-    -webkit-backdrop-filter: blur(var(--material-blur));
+    contain: layout paint;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
@@ -409,6 +411,8 @@ body:not(.platform-macos) .titlebar {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    contain: layout paint;
     padding: 10px 0 20px;
     -webkit-app-region: drag;
 }
@@ -503,6 +507,8 @@ body.platform-windows .sidebar {
 .content {
     flex: 1;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    contain: layout paint;
     padding: 24px 26px 36px;
     min-width: 0;
     background: transparent;

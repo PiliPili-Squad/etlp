@@ -516,77 +516,10 @@ fn log_liquid_glass_support() {
 }
 
 #[cfg(target_os = "macos")]
-fn apply_liquid_glass(window: &tauri::WebviewWindow) -> Result<(), String> {
-    use objc2::MainThreadMarker;
-    use objc2_app_kit::{
-        NSAutoresizingMaskOptions, NSColor, NSGlassEffectView,
-        NSGlassEffectViewStyle, NSView,
-    };
-    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
-
-    if !appkit_supports_liquid_glass() {
-        return Err("Liquid Glass requires macOS 26.0 or newer".into());
-    }
-
-    let RawWindowHandle::AppKit(handle) = window
-        .window_handle()
-        .map_err(|e| format!("window handle: {e}"))?
-        .as_raw()
-    else {
-        return Err("Liquid Glass requires an AppKit window".into());
-    };
-
-    let mtm = MainThreadMarker::new().ok_or_else(|| {
-        "Liquid Glass must be applied on the main thread".to_string()
-    })?;
-
-    unsafe {
-        let view: &NSView = handle.ns_view.cast().as_ref();
-        let ns_window = view.window().ok_or_else(|| {
-            "Liquid Glass requires an attached NSWindow".to_string()
-        })?;
-        let content_view = ns_window.contentView().ok_or_else(|| {
-            "Liquid Glass requires an NSWindow content view".to_string()
-        })?;
-        let glass =
-            NSGlassEffectView::initWithFrame(mtm.alloc(), content_view.frame());
-        let tint = NSColor::colorWithRed_green_blue_alpha(
-            18.0 / 255.0,
-            32.0 / 255.0,
-            40.0 / 255.0,
-            0.18,
-        );
-
-        glass.setStyle(NSGlassEffectViewStyle::Regular);
-        glass.setCornerRadius(12.0);
-        glass.setTintColor(Some(&tint));
-        glass.setAutoresizingMask(
-            NSAutoresizingMaskOptions::ViewWidthSizable
-                | NSAutoresizingMaskOptions::ViewHeightSizable,
-        );
-        content_view.setFrame(glass.bounds());
-        content_view.setAutoresizingMask(
-            NSAutoresizingMaskOptions::ViewWidthSizable
-                | NSAutoresizingMaskOptions::ViewHeightSizable,
-        );
-        glass.setContentView(Some(&content_view));
-        ns_window.setOpaque(false);
-        ns_window.setBackgroundColor(Some(&NSColor::clearColor()));
-        ns_window.setContentView(Some(&glass));
-    }
-
-    tracing::info!("liquid glass applied");
-
-    Ok(())
-}
-
-#[cfg(target_os = "macos")]
 fn apply_window_material(
     window: &tauri::WebviewWindow,
     liquid_glass_requested: bool,
 ) {
-    use window_vibrancy::{NSVisualEffectMaterial, apply_vibrancy};
-
     log_liquid_glass_support();
     let support = liquid_glass_support();
     let liquid_glass_enabled = liquid_glass_requested && support.supported;
@@ -596,15 +529,17 @@ fn apply_window_material(
         supported = support.supported,
         "liquid glass material decision"
     );
-    if liquid_glass_enabled && support.supported {
-        match apply_liquid_glass(window) {
-            Ok(()) => return,
-            Err(e) => eprintln!("[etlp] liquid glass: {e}"),
-        }
+    if liquid_glass_enabled {
+        tracing::info!(
+            "native liquid glass skipped; static material is used for scroll performance"
+        );
     }
 
-    apply_vibrancy(window, NSVisualEffectMaterial::Sidebar, None, Some(7.0))
-        .unwrap_or_else(|e| eprintln!("[etlp] vibrancy: {e}"));
+    if let Err(e) =
+        window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)))
+    {
+        eprintln!("[etlp] transparent background: {e}");
+    }
 }
 
 #[cfg(target_os = "windows")]
@@ -612,13 +547,11 @@ fn apply_window_material(
     window: &tauri::WebviewWindow,
     _liquid_glass_requested: bool,
 ) {
-    // Keep Windows acrylic in the same cool dark material family as the CSS
-    // shell. Blur is a compatibility fallback for older Windows builds.
-    window_vibrancy::apply_acrylic(window, Some((10, 20, 27, 118)))
-        .or_else(|_| {
-            window_vibrancy::apply_blur(window, Some((10, 20, 27, 108)))
-        })
-        .unwrap_or_else(|e| eprintln!("[etlp] acrylic: {e}"));
+    if let Err(e) =
+        window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)))
+    {
+        eprintln!("[etlp] transparent background: {e}");
+    }
 }
 
 #[cfg(target_os = "windows")]

@@ -1,4 +1,5 @@
 import {
+    memo,
     useState,
     useEffect,
     useRef,
@@ -148,7 +149,7 @@ function parseLine(raw: string): ParsedLine {
     return { time: "", level: "raw", content: raw };
 }
 
-function LogLineView({ raw }: { raw: string }) {
+const LogLineView = memo(function LogLineView({ raw }: { raw: string }) {
     const p = parseLine(raw);
     if (p.level === "raw") {
         return (
@@ -166,7 +167,7 @@ function LogLineView({ raw }: { raw: string }) {
             <span className={`log-content ${p.level}`}>{p.content}</span>
         </div>
     );
-}
+});
 
 export default function Logs({ active }: { active: boolean }) {
     const t = useI18n();
@@ -198,6 +199,7 @@ export default function Logs({ active }: { active: boolean }) {
     // read_log_before IPC calls before `loadingOlder` renders.
     const loadingOlderRef = useRef(false);
     const loadEpochRef = useRef(0);
+    const scrollRafRef = useRef<number | null>(null);
 
     useEffect(() => {
         invoke<LogPaths>("get_log_paths")
@@ -381,7 +383,8 @@ export default function Logs({ active }: { active: boolean }) {
         }
     }, [lines, autoScroll]);
 
-    const handleScroll = () => {
+    const handleScrollFrame = useCallback(() => {
+        scrollRafRef.current = null;
         const el = bodyRef.current;
         if (!el) return;
         setAutoScroll(el.scrollHeight - el.scrollTop - el.clientHeight < 40);
@@ -390,7 +393,21 @@ export default function Logs({ active }: { active: boolean }) {
             const logPath = source === "mpv" ? effectiveMpvPath : null;
             void loadOlder(logPath);
         }
+    }, [effectiveMpvPath, hasOlder, loadOlder, source]);
+
+    const handleScroll = () => {
+        if (scrollRafRef.current !== null) return;
+        scrollRafRef.current = requestAnimationFrame(handleScrollFrame);
     };
+
+    useEffect(() => {
+        return () => {
+            if (scrollRafRef.current !== null) {
+                cancelAnimationFrame(scrollRafRef.current);
+                scrollRafRef.current = null;
+            }
+        };
+    }, []);
 
     const handleSourceSwitch = (s: LogSource) => {
         if (s !== source) setSource(s);
