@@ -39,6 +39,7 @@ interface LogClearFailure {
     };
 }
 type LogSource = "app" | "mpv";
+type PerfDetails = Record<string, string | number | boolean | null>;
 
 // localStorage key holding the last user-picked mpv log path, so a manual
 // choice is remembered and preferred over the config default on next launch.
@@ -50,6 +51,10 @@ const PAGE_SIZE = 200;
 // Hard cap on rendered lines so the DOM stays bounded even after live tailing
 // and several older pages; trimming only happens at the bottom (live append).
 const MAX_LINES = 3000;
+const PERF_LOG_MIN_INTERVAL_MS = 1000;
+const SCROLL_STORM_WINDOW_MS = 1000;
+const SCROLL_STORM_THRESHOLD = 45;
+const LONG_FRAME_MS = 34;
 
 // Parse a tracing/log4rs formatted line.
 // Expected formats:
@@ -189,6 +194,20 @@ const LogLineView = memo(function LogLineView({ raw }: { raw: string }) {
     );
 });
 
+function recordFrontendPerf(
+    scope: string,
+    metric: string,
+    value: number,
+    details: PerfDetails,
+) {
+    void invoke("record_frontend_perf", {
+        scope,
+        metric,
+        value,
+        details,
+    }).catch(() => {});
+}
+
 export default function Logs({
     active,
     addToast,
@@ -226,6 +245,49 @@ export default function Logs({
     const loadingOlderRef = useRef(false);
     const loadEpochRef = useRef(0);
     const scrollRafRef = useRef<number | null>(null);
+    const lastPerfLogRef = useRef<Record<string, number>>({});
+    const scrollStatsRef = useRef({
+        windowStart: 0,
+        events: 0,
+        frames: 0,
+    });
+    const renderStartRef = useRef(performance.now());
+    const perfContextRef = useRef({
+        source: "app" as LogSource,
+        lineCount: 0,
+    });
+    const prevRenderStatsRef = useRef({
+        lines: 0,
+        displayed: 0,
+        source: "app" as LogSource,
+    });
+
+    const recordPerf = useCallback(
+        (
+            metric: string,
+            value: number,
+            details: PerfDetails = {},
+            minInterval = PERF_LOG_MIN_INTERVAL_MS,
+        ) => {
+            if (!active) return;
+            const now = performance.now();
+            const last = lastPerfLogRef.current[metric] ?? 0;
+            if (now - last < minInterval) return;
+            lastPerfLogRef.current[metric] = now;
+            recordFrontendPerf("logs", metric, value, {
+                source: perfContextRef.current.source,
+                lineCount: perfContextRef.current.lineCount,
+                ...details,
+            });
+        },
+        [active],
+    );
+
+    renderStartRef.current = performance.now();
+    perfContextRef.current = {
+        source,
+        lineCount: lines.length,
+    };
 
     useEffect(() => {
         invoke<LogPaths>("get_log_paths")
@@ -256,10 +318,24 @@ export default function Logs({
     const fetchTail = useCallback(
         async (since: number, path: string | null): Promise<number> => {
             try {
+                const started = performance.now();
                 const resp = await invoke<LogResponse>("get_log_lines", {
                     sinceBytes: since,
                     path,
                 });
+                const elapsed = performance.now() - started;
+                if (elapsed > 20 || resp.lines.length > 0) {
+                    recordPerf(
+                        "tail_ipc_ms",
+                        Math.round(elapsed * 10) / 10,
+                        {
+                            newLines: resp.lines.length,
+                            sinceBytes: since,
+                            nextBytes: resp.next_bytes,
+                        },
+                        1500,
+                    );
+                }
                 if (resp.lines.length > 0) {
                     setLines((prev) => {
                         const merged = [...prev, ...resp.lines];
@@ -273,52 +349,66 @@ export default function Logs({
                 return since;
             }
         },
-        [],
+        [recordPerf],
     );
 
     // Load an older page (scroll-up), preserving the visual scroll position by
     // restoring the distance from the bottom after the prepend.
-    const loadOlder = useCallback(async (path: string | null) => {
-        if (loadingOlderRef.current || oldestRef.current <= 0) {
-            setHasOlder(oldestRef.current > 0);
-            return;
-        }
-        loadingOlderRef.current = true;
-        setLoadingOlder(true);
-        const epoch = loadEpochRef.current;
-        const el = bodyRef.current;
-        const prevHeight = el?.scrollHeight ?? 0;
-        const prevTop = el?.scrollTop ?? 0;
-        try {
-            const resp = await invoke<BeforeResponse>("read_log_before", {
-                beforeBytes: oldestRef.current,
-                maxLines: PAGE_SIZE,
-                path,
-            });
-            if (epoch !== loadEpochRef.current) return;
-            if (resp.lines.length > 0) {
-                oldestRef.current = resp.start_bytes;
-                setHasOlder(resp.start_bytes > 0);
-                setLines((prev) => [...resp.lines, ...prev]);
-                // Restore scroll so the viewport stays on the same lines.
-                requestAnimationFrame(() => {
-                    const node = bodyRef.current;
-                    if (node) {
-                        node.scrollTop = node.scrollHeight - prevHeight + prevTop;
-                    }
+    const loadOlder = useCallback(
+        async (path: string | null) => {
+            if (loadingOlderRef.current || oldestRef.current <= 0) {
+                setHasOlder(oldestRef.current > 0);
+                return;
+            }
+            loadingOlderRef.current = true;
+            setLoadingOlder(true);
+            const epoch = loadEpochRef.current;
+            const el = bodyRef.current;
+            const prevHeight = el?.scrollHeight ?? 0;
+            const prevTop = el?.scrollTop ?? 0;
+            try {
+                const started = performance.now();
+                const resp = await invoke<BeforeResponse>("read_log_before", {
+                    beforeBytes: oldestRef.current,
+                    maxLines: PAGE_SIZE,
+                    path,
                 });
-            } else {
-                setHasOlder(false);
+                recordPerf(
+                    "older_ipc_ms",
+                    Math.round((performance.now() - started) * 10) / 10,
+                    {
+                        olderLines: resp.lines.length,
+                        beforeBytes: oldestRef.current,
+                        startBytes: resp.start_bytes,
+                    },
+                    800,
+                );
+                if (epoch !== loadEpochRef.current) return;
+                if (resp.lines.length > 0) {
+                    oldestRef.current = resp.start_bytes;
+                    setHasOlder(resp.start_bytes > 0);
+                    setLines((prev) => [...resp.lines, ...prev]);
+                    // Restore scroll so the viewport stays on the same lines.
+                    requestAnimationFrame(() => {
+                        const node = bodyRef.current;
+                        if (node) {
+                            node.scrollTop = node.scrollHeight - prevHeight + prevTop;
+                        }
+                    });
+                } else {
+                    setHasOlder(false);
+                }
+            } catch {
+                /* ignore: paging is best-effort */
+            } finally {
+                if (epoch === loadEpochRef.current) {
+                    loadingOlderRef.current = false;
+                    setLoadingOlder(false);
+                }
             }
-        } catch {
-            /* ignore: paging is best-effort */
-        } finally {
-            if (epoch === loadEpochRef.current) {
-                loadingOlderRef.current = false;
-                setLoadingOlder(false);
-            }
-        }
-    }, []);
+        },
+        [recordPerf],
+    );
 
     // Empty the active log file on disk, then reset the view to match. The live
     // poll keeps running and will pick up anything written afterwards.
@@ -422,6 +512,7 @@ export default function Logs({
     }, [lines, autoScroll]);
 
     const handleScrollFrame = useCallback(() => {
+        const frameStarted = performance.now();
         scrollRafRef.current = null;
         const el = bodyRef.current;
         if (!el) return;
@@ -431,9 +522,45 @@ export default function Logs({
             const logPath = source === "mpv" ? effectiveMpvPath : null;
             void loadOlder(logPath);
         }
-    }, [effectiveMpvPath, hasOlder, loadOlder, source]);
+        const frameCost = performance.now() - frameStarted;
+        scrollStatsRef.current.frames += 1;
+        if (frameCost > LONG_FRAME_MS) {
+            recordPerf(
+                "scroll_frame_ms",
+                Math.round(frameCost * 10) / 10,
+                {
+                    scrollTop: Math.round(el.scrollTop),
+                    scrollHeight: el.scrollHeight,
+                    clientHeight: el.clientHeight,
+                    hasOlder,
+                    loadingOlder: loadingOlderRef.current,
+                },
+                800,
+            );
+        }
+    }, [effectiveMpvPath, hasOlder, loadOlder, recordPerf, source]);
 
     const handleScroll = () => {
+        const now = performance.now();
+        const stats = scrollStatsRef.current;
+        if (now - stats.windowStart > SCROLL_STORM_WINDOW_MS) {
+            if (stats.events > SCROLL_STORM_THRESHOLD) {
+                recordPerf(
+                    "scroll_events_per_sec",
+                    stats.events,
+                    {
+                        rafFrames: stats.frames,
+                        displayed: displayed.length,
+                        autoScroll,
+                    },
+                    500,
+                );
+            }
+            stats.windowStart = now;
+            stats.events = 0;
+            stats.frames = 0;
+        }
+        stats.events += 1;
         if (scrollRafRef.current !== null) return;
         scrollRafRef.current = requestAnimationFrame(handleScrollFrame);
     };
@@ -501,6 +628,36 @@ export default function Logs({
         const needle = deferredFilter.toLowerCase();
         return base.filter((l) => l.toLowerCase().includes(needle));
     }, [lines, deferredFilter, anon]);
+
+    useEffect(() => {
+        if (!active) return;
+        const elapsed = performance.now() - renderStartRef.current;
+        const prev = prevRenderStatsRef.current;
+        const changed =
+            prev.lines !== lines.length ||
+            prev.displayed !== displayed.length ||
+            prev.source !== source;
+        if (elapsed > 12 || changed) {
+            recordPerf(
+                "render_commit_ms",
+                Math.round(elapsed * 10) / 10,
+                {
+                    displayed: displayed.length,
+                    prevLines: prev.lines,
+                    prevDisplayed: prev.displayed,
+                    changed,
+                    filterLength: deferredFilter.length,
+                    anonymized: anon,
+                },
+                1200,
+            );
+        }
+        prevRenderStatsRef.current = {
+            lines: lines.length,
+            displayed: displayed.length,
+            source,
+        };
+    });
 
     // mpv view is usable when a default log exists or the user picked a file.
     const hasMpv = Boolean(effectiveMpvPath);
