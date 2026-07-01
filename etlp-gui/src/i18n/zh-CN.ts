@@ -409,6 +409,8 @@ export const zhCN = {
     logs_mpv: "mpv 日志",
     logs_filter: "过滤…",
     logs_clear: "清空",
+    logs_clear_failed: "清空日志失败",
+    logs_clear_failed_detail: "清空日志失败：{kind}，阶段：{stage}，路径：{path}",
     logs_bottom: "↓ 底部",
     logs_empty: "等待日志输出…",
     logs_no_mpv: "未检测到 mpv 日志，点击「选择 mpv 日志」加载",

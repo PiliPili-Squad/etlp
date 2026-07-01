@@ -56,6 +56,57 @@ pub fn truncate_file(path: &Path) -> Result<(), String> {
     Err("elevation is only supported on Windows".to_owned())
 }
 
+pub fn truncate_file_after_permission_denied(
+    path: &Path,
+    error: &std::io::Error,
+) -> Result<(), String> {
+    if error.kind() == std::io::ErrorKind::PermissionDenied {
+        truncate_file(path)
+    } else {
+        Err(error.to_string())
+    }
+}
+
+pub fn create_dir_all(path: &Path) -> Result<(), String> {
+    match std::fs::create_dir_all(path) {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+            create_dir_all_elevated(path)
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+pub fn write_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    match std::fs::write(path, bytes) {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+            let tmp = std::env::temp_dir().join(format!(
+                "etlp-elevated-write-{}-{}",
+                std::process::id(),
+                chrono::Local::now().timestamp_millis()
+            ));
+            std::fs::write(&tmp, bytes)
+                .map_err(|e| format!("write temp file: {e}"))?;
+            let result = copy_file(&tmp, path);
+            let _ = std::fs::remove_file(&tmp);
+            result
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+pub fn remove_file_if_exists(path: &Path) -> Result<(), String> {
+    match std::fs::remove_file(path) {
+        Ok(()) => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+            remove_file(path)
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[cfg(target_os = "windows")]
 pub fn remove_file(path: &Path) -> Result<(), String> {
     let target = quote_ps_string(&path.to_string_lossy());
@@ -68,6 +119,20 @@ pub fn remove_file(path: &Path) -> Result<(), String> {
 
 #[cfg(not(target_os = "windows"))]
 pub fn remove_file(path: &Path) -> Result<(), String> {
+    let _ = path;
+    Err("elevation is only supported on Windows".to_owned())
+}
+
+#[cfg(target_os = "windows")]
+fn create_dir_all_elevated(path: &Path) -> Result<(), String> {
+    let target = quote_ps_string(&path.to_string_lossy());
+    run_powershell_elevated(&format!(
+        "New-Item -ItemType Directory -Force -Path {target} | Out-Null"
+    ))
+}
+
+#[cfg(not(target_os = "windows"))]
+fn create_dir_all_elevated(path: &Path) -> Result<(), String> {
     let _ = path;
     Err("elevation is only supported on Windows".to_owned())
 }

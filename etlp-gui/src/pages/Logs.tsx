@@ -28,6 +28,16 @@ interface LogPaths {
     app_log: string;
     mpv_log: string | null;
 }
+interface LogClearFailure {
+    code?: string;
+    stage?: string;
+    kind?: string;
+    message?: string;
+    elevated_error?: string;
+    diagnostic?: {
+        path?: string;
+    };
+}
 type LogSource = "app" | "mpv";
 
 // localStorage key holding the last user-picked mpv log path, so a manual
@@ -113,6 +123,16 @@ function maskSensitive(line: string): string {
     return out.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, "***.***.***.***");
 }
 
+function parseLogClearFailure(error: unknown): LogClearFailure | null {
+    if (typeof error !== "string") return null;
+    try {
+        const parsed = JSON.parse(error) as LogClearFailure;
+        return parsed.code === "LOG_CLEAR_FAILED" ? parsed : null;
+    } catch {
+        return null;
+    }
+}
+
 function parseLine(raw: string): ParsedLine {
     // ISO timestamp + level
     const m1 = raw.match(
@@ -169,7 +189,13 @@ const LogLineView = memo(function LogLineView({ raw }: { raw: string }) {
     );
 });
 
-export default function Logs({ active }: { active: boolean }) {
+export default function Logs({
+    active,
+    addToast,
+}: {
+    active: boolean;
+    addToast: (message: string, error?: boolean) => void;
+}) {
     const t = useI18n();
     const [lines, setLines] = useState<string[]>([]);
     const [autoScroll, setAutoScroll] = useState(true);
@@ -304,15 +330,27 @@ export default function Logs({ active }: { active: boolean }) {
         }
         try {
             await invoke("clear_log_file", { path: logPath });
-        } catch {
-            /* ignore: clearing is best-effort */
+        } catch (error) {
+            const failure = parseLogClearFailure(error);
+            const path = failure?.diagnostic?.path ?? logPath ?? paths?.app_log ?? "";
+            const detail = failure
+                ? t("logs_clear_failed_detail", {
+                      kind: failure.kind ?? "unknown",
+                      stage: failure.stage ?? "unknown",
+                      path,
+                  })
+                : typeof error === "string"
+                  ? error
+                  : t("logs_clear_failed");
+            addToast(detail, true);
+            return;
         }
         setLines([]);
         posRef.current = 0;
         oldestRef.current = 0;
         setHasOlder(false);
         setAutoScroll(true);
-    }, [source, effectiveMpvPath]);
+    }, [source, effectiveMpvPath, paths?.app_log, addToast, t]);
 
     // Reset the buffer when the log source changes (cleanup runs before the
     // polling effect restarts), so a source swap drops the old file's lines.

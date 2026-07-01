@@ -670,12 +670,22 @@ pub fn run() {
     // tail it. Do this before any Tauri threads start.
     let data_dir = etlp_server::platform::data_dir()
         .unwrap_or_else(|| std::path::PathBuf::from("."));
-    std::fs::create_dir_all(&data_dir).ok();
+    if let Err(e) = std::fs::create_dir_all(&data_dir) {
+        eprintln!(
+            "[etlp] create data dir failed: path={} error={e}",
+            data_dir.display()
+        );
+    }
     // Relocate legacy flat-layout files (etlp.log, mpv.log, bangumi cache) into
     // the new log/ and cache/ sub-directories before opening any of them.
     etlp_server::platform::migrate_layout(&data_dir);
     let log_dir = etlp_server::platform::log_dir_in(&data_dir);
-    std::fs::create_dir_all(&log_dir).ok();
+    if let Err(e) = std::fs::create_dir_all(&log_dir) {
+        eprintln!(
+            "[etlp] create log dir failed: path={} error={e}",
+            log_dir.display()
+        );
+    }
     let log_file = log_dir.join(commands::APP_LOG_FILE);
 
     // Read the config early so we can honour dev.log_level from the very first

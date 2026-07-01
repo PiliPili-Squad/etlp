@@ -70,7 +70,8 @@ pub struct CustomIconInfo {
 
 fn custom_icon_path() -> Result<PathBuf, String> {
     let data_dir = platform::data_dir().ok_or_else(err_no_data_dir)?;
-    std::fs::create_dir_all(&data_dir).map_err(err_create_data_dir)?;
+    crate::elevated_fs::create_dir_all(&data_dir)
+        .map_err(err_create_data_dir)?;
     Ok(data_dir.join(crate::CUSTOM_APP_ICON_FILE))
 }
 
@@ -103,6 +104,119 @@ fn apply_custom_icon(
     }
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_icon(icon);
+    }
+}
+
+fn io_error_kind(error: &std::io::Error) -> &'static str {
+    match error.kind() {
+        std::io::ErrorKind::NotFound => "not_found",
+        std::io::ErrorKind::PermissionDenied => "permission_denied",
+        std::io::ErrorKind::WouldBlock => "would_block",
+        std::io::ErrorKind::AlreadyExists => "already_exists",
+        std::io::ErrorKind::InvalidInput => "invalid_input",
+        std::io::ErrorKind::InvalidData => "invalid_data",
+        std::io::ErrorKind::TimedOut => "timed_out",
+        std::io::ErrorKind::Interrupted => "interrupted",
+        std::io::ErrorKind::Unsupported => "unsupported",
+        std::io::ErrorKind::UnexpectedEof => "unexpected_eof",
+        std::io::ErrorKind::OutOfMemory => "out_of_memory",
+        _ => "other",
+    }
+}
+
+fn log_file_diagnostic(path: &std::path::Path) -> serde_json::Value {
+    let metadata = std::fs::metadata(path);
+    let parent = path.parent();
+    serde_json::json!({
+        "path": path.to_string_lossy(),
+        "exists": path.exists(),
+        "parent": parent.map(|p| p.to_string_lossy().into_owned()),
+        "parent_exists": parent.is_some_and(|p| p.exists()),
+        "metadata_readable": metadata.is_ok(),
+        "readonly": metadata.as_ref().map(|m| m.permissions().readonly()).unwrap_or(false),
+        "len": metadata.as_ref().map(|m| m.len()).unwrap_or(0),
+    })
+}
+
+fn log_clear_error(
+    path: &std::path::Path,
+    stage: &str,
+    error: &std::io::Error,
+) -> String {
+    let diagnostic = log_file_diagnostic(path);
+    tracing::warn!(
+        path = %path.display(),
+        stage,
+        kind = io_error_kind(error),
+        error = %error,
+        diagnostic = %diagnostic,
+        "clear log file failed"
+    );
+    serde_json::json!({
+        "code": "LOG_CLEAR_FAILED",
+        "stage": stage,
+        "kind": io_error_kind(error),
+        "message": error.to_string(),
+        "diagnostic": diagnostic,
+    })
+    .to_string()
+}
+
+fn log_clear_elevation_error(
+    path: &std::path::Path,
+    stage: &str,
+    error: &std::io::Error,
+    elevated_error: &str,
+) -> String {
+    let diagnostic = log_file_diagnostic(path);
+    tracing::warn!(
+        path = %path.display(),
+        stage,
+        kind = io_error_kind(error),
+        error = %error,
+        elevated_error,
+        diagnostic = %diagnostic,
+        "clear log file elevation failed"
+    );
+    serde_json::json!({
+        "code": "LOG_CLEAR_FAILED",
+        "stage": stage,
+        "kind": io_error_kind(error),
+        "message": error.to_string(),
+        "elevated_error": elevated_error,
+        "diagnostic": diagnostic,
+    })
+    .to_string()
+}
+
+fn truncate_log_file_with_diagnostics(
+    path: &std::path::Path,
+    open_stage: &str,
+    truncate_stage: &str,
+) -> Result<(), String> {
+    match std::fs::OpenOptions::new().write(true).open(path) {
+        Ok(file) => match file.set_len(0) {
+            Ok(()) => Ok(()),
+            Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+                crate::elevated_fs::truncate_file(path).map_err(|elevated| {
+                    log_clear_elevation_error(
+                        path,
+                        truncate_stage,
+                        &e,
+                        &elevated,
+                    )
+                })
+            }
+            Err(e) => Err(log_clear_error(path, truncate_stage, &e)),
+        },
+        // Nothing written yet -> nothing to clear.
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+            crate::elevated_fs::truncate_file(path).map_err(|elevated| {
+                log_clear_elevation_error(path, open_stage, &e, &elevated)
+            })
+        }
+        Err(e) => Err(log_clear_error(path, open_stage, &e)),
     }
 }
 
@@ -866,7 +980,8 @@ pub async fn pick_custom_app_icon(
         std::fs::read(&src_path).map_err(|e| format!("ICON_READ:{e}"))?;
     let (rgba, width, height) = validate_custom_icon(&bytes)?;
     let dest = custom_icon_path()?;
-    std::fs::write(&dest, &bytes).map_err(|e| format!("ICON_WRITE:{e}"))?;
+    crate::elevated_fs::write_file(&dest, &bytes)
+        .map_err(|e| format!("ICON_WRITE:{e}"))?;
     apply_custom_icon(&app, rgba, width, height);
     Ok(Some(custom_icon_info_from_bytes(&bytes)))
 }
@@ -875,9 +990,8 @@ pub async fn pick_custom_app_icon(
 #[tauri::command]
 pub fn reset_custom_app_icon(app: tauri::AppHandle) -> Result<(), String> {
     let path = custom_icon_path()?;
-    if path.exists() {
-        std::fs::remove_file(&path).map_err(|e| format!("ICON_REMOVE:{e}"))?;
-    }
+    crate::elevated_fs::remove_file_if_exists(&path)
+        .map_err(|e| format!("ICON_REMOVE:{e}"))?;
 
     let (bytes, is_template) = crate::tray_icon_asset();
     let (rgba, width, height) = crate::decode_png_icon(bytes)
@@ -1479,26 +1593,35 @@ pub async fn clear_log_file(
         match handle.clear_log_file() {
             Ok(()) => return Ok(()),
             Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
-                crate::elevated_fs::truncate_file(&target)?;
+                crate::elevated_fs::truncate_file(&target).map_err(
+                    |elevated| {
+                        log_clear_elevation_error(
+                            &target,
+                            "clear_app_log_handle",
+                            &e,
+                            &elevated,
+                        )
+                    },
+                )?;
                 return Ok(());
             }
-            Err(e) => return Err(format!("clear log file: {e}")),
+            Err(e) => {
+                return Err(log_clear_error(
+                    &target,
+                    "clear_app_log_handle",
+                    &e,
+                ));
+            }
         }
     }
 
     // Any other file (or a missing logger handle): a plain truncate is enough,
     // since no in-process handle holds a stale cursor into it.
-    match std::fs::OpenOptions::new().write(true).open(&target) {
-        Ok(file) => file
-            .set_len(0)
-            .map_err(|e| format!("truncate log file: {e}")),
-        // Nothing written yet → nothing to clear.
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
-            crate::elevated_fs::truncate_file(&target)
-        }
-        Err(e) => Err(format!("open log file: {e}")),
-    }
+    truncate_log_file_with_diagnostics(
+        &target,
+        "open_log_file",
+        "truncate_log_file",
+    )
 }
 
 /// Open the directory containing the application log file.
@@ -1516,7 +1639,8 @@ pub async fn open_log_folder(
     let dir = log_path
         .parent()
         .ok_or_else(|| "log file has no parent directory".to_owned())?;
-    std::fs::create_dir_all(dir).map_err(|e| format!("create log dir: {e}"))?;
+    crate::elevated_fs::create_dir_all(dir)
+        .map_err(|e| format!("create log dir: {e}"))?;
     app.opener()
         .open_path(dir.to_string_lossy(), None::<&str>)
         .map_err(|e| format!("open folder: {e}"))
@@ -1690,18 +1814,12 @@ pub async fn clear_cache(state: State<'_, GuiState>) -> Result<u64, String> {
             }
             continue;
         }
-        match std::fs::OpenOptions::new().write(true).open(&path) {
-            Ok(file) => match file.set_len(0) {
-                Ok(()) => freed += size,
-                Err(e) => errors.push(format!("{}: {e}", path.display())),
-            },
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-            Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
-                match crate::elevated_fs::truncate_file(&path) {
-                    Ok(()) => freed += size,
-                    Err(e) => errors.push(format!("{}: {e}", path.display())),
-                }
-            }
+        match truncate_log_file_with_diagnostics(
+            &path,
+            "open_cache_log_file",
+            "truncate_cache_log_file",
+        ) {
+            Ok(()) => freed += size,
             Err(e) => errors.push(format!("{}: {e}", path.display())),
         }
     }
