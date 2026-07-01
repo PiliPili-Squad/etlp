@@ -382,6 +382,12 @@ export const ja: typeof zhCN = {
     sys_brand_logo: "ブランド領域を表示",
     sys_brand_logo_desc:
         "オフにするとタブ上部のブランドロゴと名前を隠し、メニューは自動的に上へ移動します",
+    sys_material_opacity: "マテリアル透明度",
+    sys_material_opacity_desc:
+        "値を下げると背景とカードがより透け、文字の透明度は変わりません",
+    sys_material_blur: "フロスト質感",
+    sys_material_blur_desc:
+        "背景のぼかし半径を調整します。値が小さいほどウィンドウ下の内容が見えます",
     sys_center_nav: "サイドバーを中央寄せ",
     sys_center_nav_desc: "サイドバーのタブをグループとして垂直方向に中央寄せします",
 

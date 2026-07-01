@@ -80,6 +80,8 @@ export interface DisplaySettings {
     fontFamily: string;
     accentColor: AccentColor;
     showBrandLogo: boolean;
+    materialOpacity: number;
+    materialBlur: number;
     /** Deprecated local preference. Always coerced to false on load. */
     centerNav: boolean;
 }
@@ -105,15 +107,29 @@ export function defaultDisplay(): DisplaySettings {
         fontFamily: "",
         accentColor: "blue",
         showBrandLogo: true,
+        materialOpacity: 100,
+        materialBlur: 7,
         centerNav: false,
     };
+}
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
+    const parsed = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(max, Math.max(min, parsed));
 }
 
 export function loadDisplay(): DisplaySettings {
     try {
         const raw = localStorage.getItem("etlp-display");
         if (raw) {
-            return { ...defaultDisplay(), ...JSON.parse(raw), centerNav: false };
+            const parsed = { ...defaultDisplay(), ...JSON.parse(raw) };
+            return {
+                ...parsed,
+                materialOpacity: clampNumber(parsed.materialOpacity, 45, 100, 100),
+                materialBlur: clampNumber(parsed.materialBlur, 0, 18, 7),
+                centerNav: false,
+            };
         }
     } catch {
         /* ignore */
@@ -133,6 +149,9 @@ export function applyDisplay(s: DisplaySettings) {
     const effectiveZoom = s.zoom * (s.fontSize / 13);
     root.style.setProperty("--base-font-size", `${s.fontSize}px`);
     root.style.setProperty("--app-zoom", String(effectiveZoom));
+    root.style.setProperty("--material-opacity", String(s.materialOpacity / 100));
+    root.style.setProperty("--material-opacity-percent", `${s.materialOpacity}%`);
+    root.style.setProperty("--material-blur", `${s.materialBlur}px`);
 
     // On Windows / Linux the platform body class overrides font-family; we
     // must set --app-font on :root so the var() in that rule resolves correctly.

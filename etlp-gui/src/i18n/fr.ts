@@ -406,6 +406,12 @@ export const fr: typeof zhCN = {
     sys_brand_logo: "Afficher l’en-tête de marque",
     sys_brand_logo_desc:
         "Masque le logo et le nom au-dessus des onglets ; le menu remonte automatiquement",
+    sys_material_opacity: "Opacité du matériau",
+    sys_material_opacity_desc:
+        "Des valeurs plus basses rendent les fonds et cartes plus transparents sans atténuer le texte",
+    sys_material_blur: "Texture givrée",
+    sys_material_blur_desc:
+        "Ajuste le rayon de flou du fond ; une valeur plus basse laisse voir davantage sous la fenêtre",
     sys_center_nav: "Centrer la barre latérale",
     sys_center_nav_desc:
         "Centrer verticalement les onglets de la barre latérale en groupe",

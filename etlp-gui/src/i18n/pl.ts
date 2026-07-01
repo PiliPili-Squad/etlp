@@ -399,6 +399,12 @@ export const pl: typeof zhCN = {
     sys_brand_logo: "Pokaż obszar marki",
     sys_brand_logo_desc:
         "Ukrywa logo i nazwę nad kartami; menu automatycznie przesuwa się w górę",
+    sys_material_opacity: "Nieprzezroczystość materiału",
+    sys_material_opacity_desc:
+        "Niższe wartości zwiększają przezroczystość tła i kart bez wygaszania tekstu",
+    sys_material_blur: "Matowa tekstura",
+    sys_material_blur_desc:
+        "Dostosuj promień rozmycia tła; niższe wartości pokazują więcej treści pod oknem",
     sys_center_nav: "Wyśrodkuj pasek boczny",
     sys_center_nav_desc: "Wyśrodkuj pionowo karty paska bocznego jako grupę",
 

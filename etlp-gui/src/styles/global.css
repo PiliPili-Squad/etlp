@@ -15,6 +15,9 @@
 
     --sidebar-w: 188px;
     --titlebar-h: 68px;
+    --material-opacity: 1;
+    --material-opacity-percent: 100%;
+    --material-blur: 7px;
 
     --window-bg: rgba(218, 226, 231, 0.72);
     --window-tint: rgba(224, 232, 236, 0.56);
@@ -147,6 +150,22 @@
     --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
+/* Material helpers keep text fully opaque while only the translucent layers
+   respond to the user-facing material opacity slider. */
+.settings-group,
+.log-container,
+.modal-card,
+.confirm-card,
+.update-result,
+.update-banner,
+.overview-hero {
+    --material-layer-bg: color-mix(
+        in srgb,
+        var(--surface-strong) var(--material-opacity-percent),
+        transparent
+    );
+}
+
 /* ── Layout ─────────────────────────────────────────────────────────── */
 html,
 body,
@@ -173,7 +192,11 @@ body.platform-linux {
     flex-direction: column;
     position: relative;
     height: 100%;
-    background: var(--window-bg);
+    background: color-mix(
+        in srgb,
+        var(--window-bg) var(--material-opacity-percent),
+        transparent
+    );
     overflow: hidden;
     border-radius: 12px;
     border: none;
@@ -182,7 +205,11 @@ body.platform-linux {
 
 /* macOS: remove solid background so vibrancy shows through */
 body.platform-macos .app {
-    background: var(--window-tint);
+    background: color-mix(
+        in srgb,
+        var(--window-tint) var(--material-opacity-percent),
+        transparent
+    );
 }
 
 .app.window-focused {
@@ -204,7 +231,11 @@ body.platform-macos .app {
 
 body.platform-macos .app.window-focused,
 body.platform-macos .app.window-blurred {
-    background: var(--window-tint);
+    background: color-mix(
+        in srgb,
+        var(--window-tint) var(--material-opacity-percent),
+        transparent
+    );
 }
 
 body.platform-macos .app.liquid-glass-enabled.window-focused {
@@ -249,7 +280,11 @@ body.platform-windows .app {
     user-select: none;
     flex-shrink: 0;
     border-bottom: none;
-    background: var(--sidebar-bg);
+    background: color-mix(
+        in srgb,
+        var(--sidebar-bg) var(--material-opacity-percent),
+        transparent
+    );
     gap: 9px;
 }
 
@@ -356,9 +391,13 @@ body:not(.platform-macos) .titlebar {
     display: flex;
     flex: 1;
     min-height: 0;
-    background: var(--sidebar-bg);
-    backdrop-filter: blur(7px);
-    -webkit-backdrop-filter: blur(7px);
+    background: color-mix(
+        in srgb,
+        var(--sidebar-bg) var(--material-opacity-percent),
+        transparent
+    );
+    backdrop-filter: blur(var(--material-blur));
+    -webkit-backdrop-filter: blur(var(--material-blur));
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────── */
@@ -530,7 +569,7 @@ body.platform-windows .content {
 
 /* ── Settings card ────────────────────────────────────────────────────── */
 .settings-group {
-    background: var(--surface-strong);
+    background: var(--material-layer-bg);
     border: 1px solid rgba(216, 238, 245, 0.018);
     border-radius: 16px;
     box-shadow: var(--shadow-sm);
@@ -622,6 +661,60 @@ body.platform-windows .content {
     align-items: center;
     gap: 8px;
     -webkit-app-region: no-drag;
+}
+
+.slider-control {
+    width: min(260px, 42vw);
+}
+
+.slider {
+    flex: 1;
+    min-width: 130px;
+    height: 22px;
+    appearance: none;
+    background: transparent;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(216, 238, 245, 0.12);
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.slider::-moz-range-track {
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(216, 238, 245, 0.12);
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.slider-value {
+    width: 42px;
+    flex-shrink: 0;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
 }
 
 /* ── Subject-mapping editor ──────────────────────────────────────────── */
@@ -1246,7 +1339,12 @@ body.platform-windows .content {
     padding: 10px 14px;
     margin-bottom: 14px;
     border-radius: 10px;
-    background: color-mix(in srgb, var(--accent-soft) 48%, var(--surface) 52%);
+    background: color-mix(
+        in srgb,
+        color-mix(in srgb, var(--accent-soft) 48%, var(--surface) 52%)
+            var(--material-opacity-percent),
+        transparent
+    );
     border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border) 66%);
 }
 .update-banner-dot {
@@ -1453,7 +1551,7 @@ body.platform-windows .content {
 
 /* ── Overview card ─────────────────────────────────────────────────────── */
 .overview-hero {
-    background: var(--surface-strong);
+    background: var(--material-layer-bg);
     border: 1px solid rgba(216, 238, 245, 0.018);
     border-radius: 16px;
     padding: 22px;
@@ -1535,7 +1633,7 @@ body.platform-windows .content {
 
 /* ── Log viewer ─────────────────────────────────────────────────────────── */
 .log-container {
-    background: var(--surface-strong);
+    background: var(--material-layer-bg);
     border: 1px solid rgba(216, 238, 245, 0.018);
     border-radius: 16px;
     overflow: hidden;
@@ -1753,7 +1851,11 @@ body.platform-windows .content {
 }
 
 .toast {
-    background: var(--surface);
+    background: color-mix(
+        in srgb,
+        var(--surface) var(--material-opacity-percent),
+        transparent
+    );
     border: 1.5px solid var(--border);
     border-radius: 10px;
     padding: 9px 16px;
@@ -1807,7 +1909,7 @@ body.platform-windows .content {
 }
 
 .modal-card {
-    background: var(--surface-strong);
+    background: var(--material-layer-bg);
     border: 1px solid var(--pane-border);
     border-radius: 14px;
     padding: 36px 32px 28px;

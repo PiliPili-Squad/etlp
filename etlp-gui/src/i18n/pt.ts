@@ -399,6 +399,12 @@ export const pt: typeof zhCN = {
     sys_brand_logo: "Mostrar área da marca",
     sys_brand_logo_desc:
         "Oculta o logótipo e o nome acima dos separadores; o menu sobe automaticamente",
+    sys_material_opacity: "Opacidade do material",
+    sys_material_opacity_desc:
+        "Valores mais baixos tornam fundos e cartões mais transparentes sem desvanecer o texto",
+    sys_material_blur: "Textura fosca",
+    sys_material_blur_desc:
+        "Ajusta o raio de desfocagem do fundo; valores mais baixos mostram mais conteúdo sob a janela",
     sys_center_nav: "Centrar barra lateral",
     sys_center_nav_desc:
         "Centrar verticalmente os separadores da barra lateral como grupo",

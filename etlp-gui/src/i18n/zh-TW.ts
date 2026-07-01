@@ -368,6 +368,10 @@ export const zhTW: typeof zhCN = {
     sys_accent_desc: "介面強調色，影響按鈕、啟用狀態及徽章顏色",
     sys_brand_logo: "顯示品牌區域",
     sys_brand_logo_desc: "關閉後隱藏 Tab 上方的品牌 Logo 和名稱，選單會自動上移",
+    sys_material_opacity: "材質透明度",
+    sys_material_opacity_desc: "調低後背景和卡片會更透，不影響文字透明度",
+    sys_material_blur: "磨砂質感",
+    sys_material_blur_desc: "調整背景模糊半徑，數值越小越能看見視窗下方內容",
     sys_center_nav: "側邊欄置中",
     sys_center_nav_desc: "將左側標籤作為整體在側邊欄縱向置中顯示",
 

@@ -402,6 +402,12 @@ export const es: typeof zhCN = {
     sys_brand_logo: "Mostrar área de marca",
     sys_brand_logo_desc:
         "Oculta el logo y el nombre sobre las pestañas; el menú sube automáticamente",
+    sys_material_opacity: "Opacidad del material",
+    sys_material_opacity_desc:
+        "Los valores más bajos hacen fondos y tarjetas más transparentes sin desvanecer el texto",
+    sys_material_blur: "Textura esmerilada",
+    sys_material_blur_desc:
+        "Ajusta el radio de desenfoque del fondo; valores más bajos revelan más contenido bajo la ventana",
     sys_center_nav: "Centrar barra lateral",
     sys_center_nav_desc:
         "Centrar verticalmente las pestañas de la barra lateral como grupo",

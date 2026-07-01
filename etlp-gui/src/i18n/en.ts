@@ -409,6 +409,12 @@ export const en: typeof zhCN = {
     sys_brand_logo: "Show Brand Header",
     sys_brand_logo_desc:
         "Hide the brand logo and name above the tabs; the menu moves up automatically",
+    sys_material_opacity: "Material Opacity",
+    sys_material_opacity_desc:
+        "Lower values make backgrounds and cards more transparent without fading text",
+    sys_material_blur: "Frosted Texture",
+    sys_material_blur_desc:
+        "Adjust the background blur radius; lower values reveal more content beneath the window",
     sys_center_nav: "Center Sidebar",
     sys_center_nav_desc: "Vertically center the sidebar tabs as a group",
 

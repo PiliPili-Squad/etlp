@@ -394,6 +394,12 @@ export const id: typeof zhCN = {
     sys_brand_logo: "Tampilkan Area Merek",
     sys_brand_logo_desc:
         "Menyembunyikan logo dan nama merek di atas tab; menu otomatis naik",
+    sys_material_opacity: "Opasitas Material",
+    sys_material_opacity_desc:
+        "Nilai lebih rendah membuat latar dan kartu lebih transparan tanpa memudarkan teks",
+    sys_material_blur: "Tekstur Buram",
+    sys_material_blur_desc:
+        "Sesuaikan radius blur latar; nilai lebih rendah menampilkan lebih banyak konten di bawah jendela",
     sys_center_nav: "Pusatkan Sidebar",
     sys_center_nav_desc: "Pusatkan tab sidebar secara vertikal sebagai grup",
 

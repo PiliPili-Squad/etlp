@@ -394,6 +394,12 @@ export const sk: typeof zhCN = {
     sys_brand_logo: "Zobraziť oblasť značky",
     sys_brand_logo_desc:
         "Skryje logo a názov nad kartami; ponuka sa automaticky posunie nahor",
+    sys_material_opacity: "Priehľadnosť materiálu",
+    sys_material_opacity_desc:
+        "Nižšie hodnoty spriehľadnia pozadia a karty bez vyblednutia textu",
+    sys_material_blur: "Matná textúra",
+    sys_material_blur_desc:
+        "Upravte polomer rozmazania pozadia; nižšie hodnoty ukážu viac obsahu pod oknom",
     sys_center_nav: "Vycentrovať bočný panel",
     sys_center_nav_desc: "Vertikálne vycentrovať karty bočného panela ako skupinu",
 

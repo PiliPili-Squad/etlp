@@ -499,6 +499,47 @@ function SelectRow({
     );
 }
 
+function SliderRow({
+    label,
+    desc,
+    value,
+    min,
+    max,
+    step,
+    valueLabel,
+    onChange,
+}: {
+    label: string;
+    desc?: string;
+    value: number;
+    min: number;
+    max: number;
+    step?: number;
+    valueLabel: (v: number) => string;
+    onChange: (v: number) => void;
+}) {
+    return (
+        <div className="row">
+            <div className="row-label">
+                <div>{label}</div>
+                {desc && <div className="row-desc">{desc}</div>}
+            </div>
+            <div className="row-control slider-control">
+                <input
+                    className="slider"
+                    type="range"
+                    value={value}
+                    min={min}
+                    max={max}
+                    step={step ?? 1}
+                    onChange={(e) => onChange(Number(e.target.value))}
+                />
+                <span className="slider-value">{valueLabel(value)}</span>
+            </div>
+        </div>
+    );
+}
+
 // ── Proxy row ─────────────────────────────────────────────────────────────────
 
 type ProxyScheme = "http" | "https";
@@ -2268,6 +2309,24 @@ function SystemSection({
                     desc={t("sys_brand_logo_desc")}
                     checked={display.showBrandLogo ?? true}
                     onChange={(v) => onDisplayChange({ showBrandLogo: v })}
+                />
+                <SliderRow
+                    label={t("sys_material_opacity")}
+                    desc={t("sys_material_opacity_desc")}
+                    value={display.materialOpacity ?? 100}
+                    min={45}
+                    max={100}
+                    valueLabel={(v) => `${v}%`}
+                    onChange={(v) => onDisplayChange({ materialOpacity: v })}
+                />
+                <SliderRow
+                    label={t("sys_material_blur")}
+                    desc={t("sys_material_blur_desc")}
+                    value={display.materialBlur ?? 7}
+                    min={0}
+                    max={18}
+                    valueLabel={(v) => `${v}px`}
+                    onChange={(v) => onDisplayChange({ materialBlur: v })}
                 />
                 {platform === "macos" && (
                     <ToggleRow

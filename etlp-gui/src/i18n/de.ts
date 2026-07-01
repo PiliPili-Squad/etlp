@@ -402,6 +402,12 @@ export const de: typeof zhCN = {
     sys_brand_logo: "Markenbereich anzeigen",
     sys_brand_logo_desc:
         "Blendet Markenlogo und Namen oberhalb der Tabs aus; das Menü rückt automatisch nach oben",
+    sys_material_opacity: "Materialtransparenz",
+    sys_material_opacity_desc:
+        "Niedrigere Werte machen Hintergründe und Karten transparenter, ohne Text auszublenden",
+    sys_material_blur: "Frost-Textur",
+    sys_material_blur_desc:
+        "Passt den Hintergrund-Weichzeichner an; niedrigere Werte zeigen mehr Inhalt unter dem Fenster",
     sys_center_nav: "Seitenleiste zentrieren",
     sys_center_nav_desc: "Die Tabs der Seitenleiste als Gruppe vertikal zentrieren",
 

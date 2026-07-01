@@ -375,6 +375,12 @@ export const he: typeof zhCN = {
     sys_brand_logo: "הצג אזור מותג",
     sys_brand_logo_desc:
         "כאשר כבוי, לוגו ושם המותג מעל הלשוניות מוסתרים והתפריט עולה אוטומטית",
+    sys_material_opacity: "אטימות חומר",
+    sys_material_opacity_desc:
+        "ערכים נמוכים הופכים רקעים וכרטיסים לשקופים יותר בלי לעמעם את הטקסט",
+    sys_material_blur: "מרקם מטושטש",
+    sys_material_blur_desc:
+        "כוונן את רדיוס טשטוש הרקע; ערכים נמוכים חושפים יותר תוכן מתחת לחלון",
     sys_center_nav: "מרכז סרגל צד",
     sys_center_nav_desc: "מרכז אנכי את כרטיסיות סרגל הצד כקבוצה",
 

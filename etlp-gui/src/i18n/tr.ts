@@ -389,6 +389,12 @@ export const tr: typeof zhCN = {
     sys_brand_logo: "Marka alanını göster",
     sys_brand_logo_desc:
         "Sekmelerin üstündeki marka logosunu ve adını gizler; menü otomatik olarak yukarı çıkar",
+    sys_material_opacity: "Malzeme Opaklığı",
+    sys_material_opacity_desc:
+        "Düşük değerler metni soldurmadan arka planları ve kartları daha şeffaf yapar",
+    sys_material_blur: "Buzlu Doku",
+    sys_material_blur_desc:
+        "Arka plan bulanıklık yarıçapını ayarlar; düşük değerler pencere altındaki içeriği daha çok gösterir",
     sys_center_nav: "Kenar Çubuğunu Ortala",
     sys_center_nav_desc: "Kenar çubuğu sekmelerini grup olarak dikey ortala",
 

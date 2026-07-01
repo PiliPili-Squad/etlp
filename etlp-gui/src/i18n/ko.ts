@@ -382,6 +382,12 @@ export const ko: typeof zhCN = {
     sys_brand_logo: "브랜드 영역 표시",
     sys_brand_logo_desc:
         "끄면 탭 위의 브랜드 로고와 이름을 숨기고 메뉴가 자동으로 위로 이동합니다",
+    sys_material_opacity: "재질 투명도",
+    sys_material_opacity_desc:
+        "값을 낮추면 배경과 카드가 더 투명해지며 텍스트 투명도는 변하지 않습니다",
+    sys_material_blur: "프로스트 질감",
+    sys_material_blur_desc:
+        "배경 흐림 반경을 조정합니다. 값이 낮을수록 창 아래 내용이 더 잘 보입니다",
     sys_center_nav: "사이드바 가운데 정렬",
     sys_center_nav_desc: "사이드바 탭을 그룹으로 세로 가운데 정렬합니다",
 
