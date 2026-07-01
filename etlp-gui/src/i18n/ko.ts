@@ -143,11 +143,6 @@ export const ko: typeof zhCN = {
     sys_theme_light: "밝게",
     sys_theme_dark: "어둡게",
     sys_lang_system: "시스템",
-    sys_liquid_glass: "Liquid Glass (실험적)",
-    sys_liquid_glass_desc:
-        "macOS 26 Liquid Glass 창 소재를 사용합니다. 변경 사항을 적용하려면 앱을 다시 시작하세요",
-    sys_liquid_glass_unavailable:
-        "이 시스템은 Liquid Glass를 지원하지 않아 이 옵션이 비활성화되었습니다",
     sys_display: "디스플레이",
     sys_font_size: "글꼴 크기",
     sys_font_size_desc: "UI 텍스트 크기를 조정합니다",
@@ -394,12 +389,15 @@ export const ko: typeof zhCN = {
     sys_app_icon_too_small:
         "이미지 해상도가 너무 낮습니다({size}). 최소 512x512가 필요합니다",
     sys_app_icon_invalid: "유효한 PNG 이미지를 선택하세요",
-    sys_material_opacity: "재질 투명도",
+    sys_material_opacity: "재질 불투명도",
     sys_material_opacity_desc:
-        "값을 낮추면 배경과 카드가 더 투명해지며 텍스트 투명도는 변하지 않습니다",
-    sys_material_blur: "프로스트 질감",
+        "50%는 기본 느낌을 유지합니다. 왼쪽은 더 투명하게, 오른쪽은 더 두껍게 표시합니다",
+    sys_live_backdrop: "실시간 배경 흐림",
+    sys_live_backdrop_desc:
+        "끄면 안정적인 스크롤을 위해 정적 재질을 사용합니다. 켜면 창 뒤의 내용을 실제로 흐리게 처리하므로 더 높은 성능이 필요합니다",
+    sys_material_blur: "배경 흐림",
     sys_material_blur_desc:
-        "배경 흐림 반경을 조정합니다. 값이 낮을수록 창 아래 내용이 더 잘 보입니다",
+        "재질의 흐림 반경을 조정합니다. 값이 높을수록 창 아래 내용이 더 흐려집니다",
     sys_center_nav: "사이드바 가운데 정렬",
     sys_center_nav_desc: "사이드바 탭을 그룹으로 세로 가운데 정렬합니다",
 

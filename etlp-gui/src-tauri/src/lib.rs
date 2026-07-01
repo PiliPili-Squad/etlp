@@ -5,9 +5,6 @@ pub mod commands;
 pub mod config_patch;
 pub mod elevated_fs;
 
-#[cfg(target_os = "macos")]
-use std::sync::Once;
-
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{
@@ -22,8 +19,6 @@ const DEFAULT_WINDOW_HEIGHT: f64 = 700.0;
 pub const CUSTOM_APP_ICON_FILE: &str = "custom-app-icon.png";
 pub const TRAY_ICON_ID: &str = "main";
 const WINDOW_STATE_FILE: &str = "window-state.json";
-#[cfg(target_os = "macos")]
-static LIQUID_GLASS_LOG_ONCE: Once = Once::new();
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct WindowState {
@@ -456,97 +451,8 @@ fn persist_window_state(window: &tauri::Window) {
     write_window_state(window.app_handle(), &state);
 }
 
-#[cfg(target_os = "macos")]
-fn is_macos_26_or_newer() -> bool {
-    std::process::Command::new("sw_vers")
-        .arg("-productVersion")
-        .output()
-        .ok()
-        .and_then(|out| String::from_utf8(out.stdout).ok())
-        .and_then(|version| version.split('.').next()?.parse::<u32>().ok())
-        .is_some_and(|major| major >= 26)
-}
-
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct LiquidGlassSupport {
-    pub supported: bool,
-    pub macos26_or_newer: bool,
-    pub appkit_supported: bool,
-}
-
-#[cfg(target_os = "macos")]
-fn appkit_supports_liquid_glass() -> bool {
-    use objc2_app_kit::NSAppKitVersionNumber;
-
-    // SAFETY: AppKit exports this process-wide read-only version number.
-    let appkit_version = unsafe { NSAppKitVersionNumber };
-    appkit_version >= 2685.0
-}
-
-#[cfg(target_os = "macos")]
-pub fn liquid_glass_support() -> LiquidGlassSupport {
-    let macos26_or_newer = is_macos_26_or_newer();
-    let appkit_supported = appkit_supports_liquid_glass();
-    LiquidGlassSupport {
-        supported: macos26_or_newer && appkit_supported,
-        macos26_or_newer,
-        appkit_supported,
-    }
-}
-
-#[cfg(not(target_os = "macos"))]
-pub fn liquid_glass_support() -> LiquidGlassSupport {
-    LiquidGlassSupport {
-        supported: false,
-        macos26_or_newer: false,
-        appkit_supported: false,
-    }
-}
-
-#[cfg(target_os = "macos")]
-fn log_liquid_glass_support() {
-    LIQUID_GLASS_LOG_ONCE.call_once(|| {
-        let support = liquid_glass_support();
-        tracing::info!(
-            macos26_or_newer = support.macos26_or_newer,
-            appkit_supported = support.appkit_supported,
-            "liquid glass support"
-        );
-    });
-}
-
-#[cfg(target_os = "macos")]
-fn apply_window_material(
-    window: &tauri::WebviewWindow,
-    liquid_glass_requested: bool,
-) {
-    log_liquid_glass_support();
-    let support = liquid_glass_support();
-    let liquid_glass_enabled = liquid_glass_requested && support.supported;
-    tracing::info!(
-        requested = liquid_glass_requested,
-        enabled = liquid_glass_enabled,
-        supported = support.supported,
-        "liquid glass material decision"
-    );
-    if liquid_glass_enabled {
-        tracing::info!(
-            "native liquid glass skipped; static material is used for scroll performance"
-        );
-    }
-
-    if let Err(e) =
-        window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)))
-    {
-        eprintln!("[etlp] transparent background: {e}");
-    }
-}
-
-#[cfg(target_os = "windows")]
-fn apply_window_material(
-    window: &tauri::WebviewWindow,
-    _liquid_glass_requested: bool,
-) {
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+fn apply_window_material(window: &tauri::WebviewWindow) {
     if let Err(e) =
         window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)))
     {
@@ -565,11 +471,7 @@ fn apply_window_frame(window: &tauri::WebviewWindow) {
 fn apply_window_frame(_window: &tauri::WebviewWindow) {}
 
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn apply_window_material(
-    _window: &tauri::WebviewWindow,
-    _liquid_glass_requested: bool,
-) {
-}
+fn apply_window_material(_window: &tauri::WebviewWindow) {}
 
 // ── Windows UAC elevation ─────────────────────────────────────────────────────
 
@@ -710,10 +612,6 @@ pub fn run() {
         .as_ref()
         .map(|c| c.gui.autostart)
         .unwrap_or(false);
-    let liquid_glass_requested = initial_config
-        .as_ref()
-        .map(|c| c.gui.liquid_glass)
-        .unwrap_or(true);
 
     let rotation = initial_config
         .as_ref()
@@ -850,12 +748,10 @@ pub fn run() {
                 // lights and Linux keeps the native frame.
                 apply_window_frame(&window);
                 // ── Window material ───────────────────────────────────────────
-                // macOS uses window-vibrancy directly instead of Tauri's
-                // set_effects(): Tauri's NSVisualEffectView setup changes
-                // hit-testing and breaks the custom drag region. On macOS 26+
-                // this applies NSGlassEffectView, falling back to vibrancy on
-                // older systems or when the runtime rejects Liquid Glass.
-                apply_window_material(&window, liquid_glass_requested);
+                // Keep the native window transparent; the visible material is
+                // rendered by CSS, with live backdrop blur enabled only by an
+                // explicit display preference.
+                apply_window_material(&window);
                 if let Some(path) = custom_app_icon_path()
                     && let Ok(bytes) = std::fs::read(path)
                     && let Ok((rgba, width, height)) = decode_png_icon(&bytes)
@@ -949,7 +845,6 @@ pub fn run() {
             commands::list_system_fonts,
             commands::set_autostart,
             commands::get_autostart,
-            commands::get_liquid_glass_support,
             commands::get_custom_app_icon,
             commands::pick_custom_app_icon,
             commands::reset_custom_app_icon,

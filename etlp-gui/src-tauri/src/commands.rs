@@ -305,7 +305,6 @@ pub struct ConfigDto {
     pub download_dir: String,
     pub silent_start: bool,
     pub check_update: bool,
-    pub liquid_glass: bool,
     // [trakt]
     pub trakt_client_id: String,
     pub trakt_client_secret: String,
@@ -370,8 +369,6 @@ impl From<&Config> for ConfigDto {
                 .unwrap_or_default(),
             silent_start: c.gui.silent_start,
             check_update: c.gui.check_update,
-            liquid_glass: c.gui.liquid_glass
-                && crate::liquid_glass_support().supported,
             trakt_client_id: c.trakt.client_id.clone(),
             trakt_client_secret: c.trakt.client_secret.clone(),
             trakt_user_name: c.trakt.user_name.clone(),
@@ -3026,11 +3023,6 @@ pub async fn get_autostart(app: tauri::AppHandle) -> Result<bool, String> {
     app.autolaunch()
         .is_enabled()
         .map_err(|e| format!("query autostart: {e}"))
-}
-
-#[tauri::command]
-pub fn get_liquid_glass_support() -> crate::LiquidGlassSupport {
-    crate::liquid_glass_support()
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

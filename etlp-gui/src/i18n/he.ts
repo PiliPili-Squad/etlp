@@ -143,10 +143,6 @@ export const he: typeof zhCN = {
     sys_theme_light: "בהיר",
     sys_theme_dark: "כהה",
     sys_lang_system: "מערכת",
-    sys_liquid_glass: "Liquid Glass (ניסיוני)",
-    sys_liquid_glass_desc:
-        "השתמש בחומר חלון Liquid Glass של macOS 26; יש להפעיל מחדש את האפליקציה כדי להחיל שינויים",
-    sys_liquid_glass_unavailable: "Liquid Glass אינו נתמך במערכת זו, לכן האפשרות מושבתת",
     sys_display: "תצוגה",
     sys_font_size: "גודל גופן",
     sys_font_size_desc: "כוונן את גודל טקסט הממשק",
@@ -387,10 +383,13 @@ export const he: typeof zhCN = {
     sys_app_icon_invalid: "בחר תמונת PNG תקינה",
     sys_material_opacity: "אטימות חומר",
     sys_material_opacity_desc:
-        "ערכים נמוכים הופכים רקעים וכרטיסים לשקופים יותר בלי לעמעם את הטקסט",
-    sys_material_blur: "מרקם מטושטש",
+        "50% שומר על מראה ברירת המחדל; שמאלה לשקיפות גבוהה יותר, ימינה לחומר צפוף יותר",
+    sys_live_backdrop: "טשטוש רקע בזמן אמת",
+    sys_live_backdrop_desc:
+        "כשהאפשרות כבויה נעשה שימוש בחומר סטטי לשמירה על גלילה יציבה; כשהיא פעילה התוכן שמאחורי החלון מטושטש באמת ונדרש ביצועים גבוהים יותר",
+    sys_material_blur: "טשטוש רקע",
     sys_material_blur_desc:
-        "כוונן את רדיוס טשטוש הרקע; ערכים נמוכים חושפים יותר תוכן מתחת לחלון",
+        "כוונן את רדיוס טשטוש החומר; ערכים גבוהים מטשטשים יותר את התוכן שמתחת לחלון",
     sys_center_nav: "מרכז סרגל צד",
     sys_center_nav_desc: "מרכז אנכי את כרטיסיות סרגל הצד כקבוצה",
 

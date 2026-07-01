@@ -83,6 +83,7 @@ export interface DisplaySettings {
     customBrandName: string;
     materialOpacity: number;
     materialBlur: number;
+    liveBackdropBlur: boolean;
     /** Deprecated local preference. Always coerced to false on load. */
     centerNav: boolean;
 }
@@ -109,8 +110,9 @@ export function defaultDisplay(): DisplaySettings {
         accentColor: "blue",
         showBrandLogo: true,
         customBrandName: "",
-        materialOpacity: 100,
-        materialBlur: 7,
+        materialOpacity: 50,
+        materialBlur: 9,
+        liveBackdropBlur: false,
         centerNav: false,
     };
 }
@@ -125,15 +127,26 @@ export function loadDisplay(): DisplaySettings {
     try {
         const raw = localStorage.getItem("etlp-display");
         if (raw) {
-            const parsed = { ...defaultDisplay(), ...JSON.parse(raw) };
+            const rawParsed = JSON.parse(raw);
+            const parsed = { ...defaultDisplay(), ...rawParsed };
+            const isLegacyMaterialScale = !Object.prototype.hasOwnProperty.call(
+                rawParsed,
+                "liveBackdropBlur",
+            );
+            const storedOpacity = clampNumber(parsed.materialOpacity, 0, 115, 50);
+            const materialOpacity =
+                isLegacyMaterialScale && storedOpacity > 80
+                    ? Math.round(storedOpacity / 2)
+                    : storedOpacity;
             return {
                 ...parsed,
                 customBrandName:
                     typeof parsed.customBrandName === "string"
                         ? parsed.customBrandName
                         : "",
-                materialOpacity: clampNumber(parsed.materialOpacity, 45, 100, 100),
-                materialBlur: clampNumber(parsed.materialBlur, 0, 18, 7),
+                materialOpacity: clampNumber(materialOpacity, 0, 100, 50),
+                materialBlur: clampNumber(parsed.materialBlur, 0, 18, 9),
+                liveBackdropBlur: parsed.liveBackdropBlur === true,
                 centerNav: false,
             };
         }
@@ -153,10 +166,13 @@ export function applyDisplay(s: DisplaySettings) {
     // those with hardcoded px values. Default font size (13) gives a multiplier
     // of 1 — backward-compatible with stored zoom preferences.
     const effectiveZoom = s.zoom * (s.fontSize / 13);
+    const materialMix = 72 + Math.min(s.materialOpacity, 50) * 0.56;
+    const materialDensity = Math.max(0, (s.materialOpacity - 50) / 50);
     root.style.setProperty("--base-font-size", `${s.fontSize}px`);
     root.style.setProperty("--app-zoom", String(effectiveZoom));
-    root.style.setProperty("--material-opacity", String(s.materialOpacity / 100));
-    root.style.setProperty("--material-opacity-percent", `${s.materialOpacity}%`);
+    root.style.setProperty("--material-opacity", String(materialMix / 100));
+    root.style.setProperty("--material-opacity-percent", `${materialMix}%`);
+    root.style.setProperty("--material-density", String(materialDensity));
     root.style.setProperty("--material-blur", `${s.materialBlur}px`);
 
     // On Windows / Linux the platform body class overrides font-family; we

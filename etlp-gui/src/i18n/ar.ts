@@ -144,11 +144,6 @@ export const ar: typeof zhCN = {
     sys_theme_light: "فاتح",
     sys_theme_dark: "داكن",
     sys_lang_system: "النظام",
-    sys_liquid_glass: "Liquid Glass (تجريبي)",
-    sys_liquid_glass_desc:
-        "استخدم مادة نافذة Liquid Glass في macOS 26؛ أعد تشغيل التطبيق لتطبيق التغييرات",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass غير مدعوم على هذا النظام، لذلك تم تعطيل هذا الخيار",
     sys_display: "العرض",
     sys_font_size: "حجم الخط",
     sys_font_size_desc: "ضبط حجم نص الواجهة",
@@ -396,12 +391,15 @@ export const ar: typeof zhCN = {
     sys_app_icon_reset_done: "تمت استعادة الأيقونة الافتراضية",
     sys_app_icon_too_small: "دقة الصورة منخفضة جدًا ({size})؛ يلزم 512x512 على الأقل",
     sys_app_icon_invalid: "اختر صورة PNG صالحة",
-    sys_material_opacity: "شفافية المادة",
+    sys_material_opacity: "عتامة المادة",
     sys_material_opacity_desc:
-        "القيم الأقل تجعل الخلفيات والبطاقات أكثر شفافية من دون جعل النص باهتًا",
-    sys_material_blur: "ملمس زجاجي مصنفر",
+        "50% يحافظ على المظهر الافتراضي؛ حرّك لليسار لمزيد من الشفافية أو لليمين لمادة أكثر كثافة",
+    sys_live_backdrop: "تمويه الخلفية الفوري",
+    sys_live_backdrop_desc:
+        "عند إيقافه تُستخدم مادة ثابتة للحفاظ على سلاسة التمرير؛ عند تشغيله يتم تمويه ما خلف النافذة فعليًا ويتطلب أداءً أعلى",
+    sys_material_blur: "تمويه الخلفية",
     sys_material_blur_desc:
-        "اضبط نصف قطر تمويه الخلفية؛ القيم الأقل تكشف محتوى أكثر أسفل النافذة",
+        "اضبط نصف قطر تمويه المادة؛ القيم الأعلى تجعل المحتوى أسفل النافذة أكثر تمويهًا",
     sys_center_nav: "توسيط الشريط الجانبي",
     sys_center_nav_desc: "توسيط علامات تبويب الشريط الجانبي رأسيًا كمجموعة",
 

@@ -145,11 +145,6 @@ export const en: typeof zhCN = {
     sys_theme_light: "Light",
     sys_theme_dark: "Dark",
     sys_lang_system: "System",
-    sys_liquid_glass: "Liquid Glass (Experimental)",
-    sys_liquid_glass_desc:
-        "Use the macOS 26 Liquid Glass window material; restart the app to apply changes",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass is not supported on this system, so this option is disabled",
     sys_display: "Display",
     sys_font_size: "Font Size",
     sys_font_size_desc: "Adjust the UI text size",
@@ -424,10 +419,13 @@ export const en: typeof zhCN = {
     sys_app_icon_invalid: "Choose a valid PNG image",
     sys_material_opacity: "Material Opacity",
     sys_material_opacity_desc:
-        "Lower values make backgrounds and cards more transparent without fading text",
-    sys_material_blur: "Frosted Texture",
+        "50% keeps the default look; move left for more transparency or right for denser material",
+    sys_live_backdrop: "Live Background Blur",
+    sys_live_backdrop_desc:
+        "Off uses static material for stable scrolling; on truly blurs content beneath the window and requires more performance",
+    sys_material_blur: "Background Blur",
     sys_material_blur_desc:
-        "Adjust the background blur radius; lower values reveal more content beneath the window",
+        "Adjust the blur radius of the material; higher values blur the content beneath more",
     sys_center_nav: "Center Sidebar",
     sys_center_nav_desc: "Vertically center the sidebar tabs as a group",
 

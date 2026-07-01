@@ -141,10 +141,6 @@ export const zhTW: typeof zhCN = {
     sys_theme_light: "亮色",
     sys_theme_dark: "暗色",
     sys_lang_system: "跟隨系統",
-    sys_liquid_glass: "液態玻璃（實驗性）",
-    sys_liquid_glass_desc:
-        "啟用 macOS 26 的液態玻璃視窗材質；修改後需重新啟動應用程式才會生效",
-    sys_liquid_glass_unavailable: "目前系統不支援液態玻璃，已停用",
     sys_display: "顯示",
     sys_font_size: "字體大小",
     sys_font_size_desc: "調整介面文字大小",
@@ -378,10 +374,13 @@ export const zhTW: typeof zhCN = {
     sys_app_icon_reset_done: "已恢復預設圖示",
     sys_app_icon_too_small: "圖片解析度過低（{size}），至少需要 512x512",
     sys_app_icon_invalid: "請選擇有效的 PNG 圖片",
-    sys_material_opacity: "材質透明度",
-    sys_material_opacity_desc: "調低後背景和卡片會更透，不影響文字透明度",
+    sys_material_opacity: "材質不透明度",
+    sys_material_opacity_desc: "50% 為預設觀感，向左更透明，向右更厚重",
+    sys_live_backdrop: "即時背景模糊",
+    sys_live_backdrop_desc:
+        "關閉時使用靜態材質以保持捲動穩定；開啟後會真實模糊視窗下方內容，但需要更高效能",
     sys_material_blur: "磨砂質感",
-    sys_material_blur_desc: "調整背景模糊半徑，數值越小越能看見視窗下方內容",
+    sys_material_blur_desc: "調整材質的背景模糊程度，數值越大視窗下方內容越模糊",
     sys_center_nav: "側邊欄置中",
     sys_center_nav_desc: "將左側標籤作為整體在側邊欄縱向置中顯示",
 

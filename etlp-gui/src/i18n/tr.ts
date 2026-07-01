@@ -145,11 +145,6 @@ export const tr: typeof zhCN = {
     sys_theme_light: "Açık",
     sys_theme_dark: "Koyu",
     sys_lang_system: "Sistem",
-    sys_liquid_glass: "Liquid Glass (deneysel)",
-    sys_liquid_glass_desc:
-        "macOS 26 Liquid Glass pencere malzemesini kullan; değişikliklerin uygulanması için uygulamayı yeniden başlat",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass bu sistemde desteklenmiyor, bu nedenle seçenek devre dışı",
     sys_display: "Ekran",
     sys_font_size: "Yazı Tipi Boyutu",
     sys_font_size_desc: "Arayüz metin boyutunu ayarla",
@@ -404,10 +399,13 @@ export const tr: typeof zhCN = {
     sys_app_icon_invalid: "Geçerli bir PNG görseli seçin",
     sys_material_opacity: "Malzeme Opaklığı",
     sys_material_opacity_desc:
-        "Düşük değerler metni soldurmadan arka planları ve kartları daha şeffaf yapar",
-    sys_material_blur: "Buzlu Doku",
+        "50% varsayılan görünümü korur; sola daha saydam, sağa daha yoğun yapar",
+    sys_live_backdrop: "Canlı Arka Plan Bulanıklığı",
+    sys_live_backdrop_desc:
+        "Kapalıyken kaydırmayı kararlı tutmak için statik malzeme kullanılır; açıkken pencerenin arkasındaki içerik gerçekten bulanıklaştırılır ve daha yüksek performans gerekir",
+    sys_material_blur: "Arka Plan Bulanıklığı",
     sys_material_blur_desc:
-        "Arka plan bulanıklık yarıçapını ayarlar; düşük değerler pencere altındaki içeriği daha çok gösterir",
+        "Malzemenin bulanıklık yarıçapını ayarlar; yüksek değerler alttaki içeriği daha çok bulanıklaştırır",
     sys_center_nav: "Kenar Çubuğunu Ortala",
     sys_center_nav_desc: "Kenar çubuğu sekmelerini grup olarak dikey ortala",
 

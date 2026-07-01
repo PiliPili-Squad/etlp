@@ -147,11 +147,6 @@ export const fr: typeof zhCN = {
     sys_theme_light: "Clair",
     sys_theme_dark: "Sombre",
     sys_lang_system: "Système",
-    sys_liquid_glass: "Liquid Glass (expérimental)",
-    sys_liquid_glass_desc:
-        "Utiliser le matériau de fenêtre Liquid Glass de macOS 26 ; redémarrez l’app pour appliquer les changements",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass n’est pas pris en charge sur ce système, cette option est donc désactivée",
     sys_display: "Affichage",
     sys_font_size: "Taille de police",
     sys_font_size_desc: "Ajuster la taille du texte de l'interface",
@@ -421,10 +416,13 @@ export const fr: typeof zhCN = {
     sys_app_icon_invalid: "Choisissez une image PNG valide",
     sys_material_opacity: "Opacité du matériau",
     sys_material_opacity_desc:
-        "Des valeurs plus basses rendent les fonds et cartes plus transparents sans atténuer le texte",
-    sys_material_blur: "Texture givrée",
+        "50% conserve l'apparence par défaut ; vers la gauche c'est plus transparent, vers la droite plus dense",
+    sys_live_backdrop: "Flou d'arrière-plan en temps réel",
+    sys_live_backdrop_desc:
+        "Désactivé, utilise un matériau statique pour garder un défilement stable ; activé, floute réellement le contenu derrière la fenêtre et demande plus de performances",
+    sys_material_blur: "Flou d'arrière-plan",
     sys_material_blur_desc:
-        "Ajuste le rayon de flou du fond ; une valeur plus basse laisse voir davantage sous la fenêtre",
+        "Ajuste le rayon de flou du matériau ; une valeur plus élevée floute davantage le contenu dessous",
     sys_center_nav: "Centrer la barre latérale",
     sys_center_nav_desc:
         "Centrer verticalement les onglets de la barre latérale en groupe",

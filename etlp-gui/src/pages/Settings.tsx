@@ -13,7 +13,6 @@ import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { LangMode, DisplaySettings, AccentColor } from "../display";
 import { ACCENT_PALETTES } from "../display";
-import { usePlatform } from "../hooks/usePlatform";
 import { useI18n } from "../i18n";
 import type { I18nKey } from "../i18n";
 
@@ -48,7 +47,6 @@ interface ConfigDto {
     download_dir: string;
     silent_start: boolean;
     check_update: boolean;
-    liquid_glass: boolean;
     disable_progress_report: boolean;
     trakt_client_id: string;
     trakt_client_secret: string;
@@ -91,13 +89,6 @@ interface Props {
     customIconUrl: string | null;
     onCustomIconChange: (url: string | null) => void;
     onAbout: () => void;
-    onLiquidGlassChange: (enabled: boolean) => void;
-}
-
-interface LiquidGlassSupport {
-    supported: boolean;
-    macos26_or_newer: boolean;
-    appkit_supported: boolean;
 }
 
 interface CustomIconInfo {
@@ -291,7 +282,7 @@ function ToggleRow({
     onChange: (v: boolean) => void;
 }) {
     return (
-        <div className="row">
+        <div className={`row${disabled ? " row-disabled" : ""}`}>
             <div className="row-label">
                 <div>{label}</div>
                 {desc && <div className="row-desc">{desc}</div>}
@@ -512,6 +503,7 @@ function SliderRow({
     min,
     max,
     step,
+    disabled,
     valueLabel,
     onChange,
 }: {
@@ -521,11 +513,12 @@ function SliderRow({
     min: number;
     max: number;
     step?: number;
+    disabled?: boolean;
     valueLabel: (v: number) => string;
     onChange: (v: number) => void;
 }) {
     return (
-        <div className="row">
+        <div className={`row${disabled ? " row-disabled" : ""}`}>
             <div className="row-label">
                 <div>{label}</div>
                 {desc && <div className="row-desc">{desc}</div>}
@@ -538,6 +531,7 @@ function SliderRow({
                     min={min}
                     max={max}
                     step={step ?? 1}
+                    disabled={disabled}
                     onChange={(e) => onChange(Number(e.target.value))}
                 />
                 <span className="slider-value">{valueLabel(value)}</span>
@@ -1250,7 +1244,6 @@ export default function Settings({
     customIconUrl,
     onCustomIconChange,
     onAbout,
-    onLiquidGlassChange,
 }: Props) {
     const t = useI18n();
     const [cfg, setCfg] = useState<ConfigDto | null>(null);
@@ -1299,14 +1292,11 @@ export default function Settings({
                           } as ConfigDto)
                         : prev,
                 );
-                if (sec === "gui" && key === "liquid_glass") {
-                    onLiquidGlassChange(Boolean(value));
-                }
             } catch (e) {
                 addToast(mapBackendError(e, t), true);
             }
         },
-        [addToast, onLiquidGlassChange, t],
+        [addToast, t],
     );
 
     const handleAutostart = useCallback(
@@ -2212,28 +2202,9 @@ function SystemSection({
     onAbout: () => void;
 }) {
     const t = useI18n();
-    const platform = usePlatform();
 
     const dpr =
         typeof window !== "undefined" ? window.devicePixelRatio.toFixed(1) : "1.0";
-    const [liquidGlassSupport, setLiquidGlassSupport] = useState<LiquidGlassSupport>({
-        supported: false,
-        macos26_or_newer: false,
-        appkit_supported: false,
-    });
-
-    useEffect(() => {
-        if (platform !== "macos") return;
-        invoke<LiquidGlassSupport>("get_liquid_glass_support")
-            .then(setLiquidGlassSupport)
-            .catch(() =>
-                setLiquidGlassSupport({
-                    supported: false,
-                    macos26_or_newer: false,
-                    appkit_supported: false,
-                }),
-            );
-    }, [platform]);
 
     // ── Cache ────────────────────────────────────────────────────────────────
     const [cacheSize, setCacheSize] = useState<number | null>(null);
@@ -2417,34 +2388,28 @@ function SystemSection({
                 <SliderRow
                     label={t("sys_material_opacity")}
                     desc={t("sys_material_opacity_desc")}
-                    value={display.materialOpacity ?? 100}
-                    min={45}
+                    value={display.materialOpacity ?? 50}
+                    min={0}
                     max={100}
                     valueLabel={(v) => `${v}%`}
                     onChange={(v) => onDisplayChange({ materialOpacity: v })}
                 />
+                <ToggleRow
+                    label={t("sys_live_backdrop")}
+                    desc={t("sys_live_backdrop_desc")}
+                    checked={display.liveBackdropBlur ?? false}
+                    onChange={(v) => onDisplayChange({ liveBackdropBlur: v })}
+                />
                 <SliderRow
                     label={t("sys_material_blur")}
                     desc={t("sys_material_blur_desc")}
-                    value={display.materialBlur ?? 7}
+                    value={display.materialBlur ?? 9}
                     min={0}
                     max={18}
-                    valueLabel={(v) => `${v}px`}
+                    disabled={!display.liveBackdropBlur}
+                    valueLabel={(v) => `${v}/18`}
                     onChange={(v) => onDisplayChange({ materialBlur: v })}
                 />
-                {platform === "macos" && (
-                    <ToggleRow
-                        label={t("sys_liquid_glass")}
-                        desc={
-                            liquidGlassSupport.supported
-                                ? t("sys_liquid_glass_desc")
-                                : t("sys_liquid_glass_unavailable")
-                        }
-                        checked={cfg.liquid_glass && liquidGlassSupport.supported}
-                        disabled={!liquidGlassSupport.supported}
-                        onChange={(v) => update("gui", "liquid_glass", v)}
-                    />
-                )}
             </div>
 
             {/* Display */}

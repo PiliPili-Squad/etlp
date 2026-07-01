@@ -146,11 +146,6 @@ export const sk: typeof zhCN = {
     sys_theme_light: "Svetlý",
     sys_theme_dark: "Tmavý",
     sys_lang_system: "Systém",
-    sys_liquid_glass: "Liquid Glass (experimentálne)",
-    sys_liquid_glass_desc:
-        "Použiť materiál okna Liquid Glass z macOS 26; zmeny sa prejavia po reštarte aplikácie",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass nie je v tomto systéme podporovaný, preto je táto možnosť vypnutá",
     sys_display: "Zobrazenie",
     sys_font_size: "Veľkosť písma",
     sys_font_size_desc: "Upraviť veľkosť textu rozhrania",
@@ -407,12 +402,15 @@ export const sk: typeof zhCN = {
     sys_app_icon_too_small:
         "Rozlíšenie obrázka je príliš nízke ({size}); vyžaduje sa aspoň 512x512",
     sys_app_icon_invalid: "Vyberte platný PNG obrázok",
-    sys_material_opacity: "Priehľadnosť materiálu",
+    sys_material_opacity: "Nepriehľadnosť materiálu",
     sys_material_opacity_desc:
-        "Nižšie hodnoty spriehľadnia pozadia a karty bez vyblednutia textu",
-    sys_material_blur: "Matná textúra",
+        "50% zachová predvolený vzhľad; doľava je priehľadnejší, doprava hustejší",
+    sys_live_backdrop: "Živé rozmazanie pozadia",
+    sys_live_backdrop_desc:
+        "Vypnuté používa statický materiál, aby bolo posúvanie stabilné; zapnuté skutočne rozmazáva obsah za oknom a vyžaduje vyšší výkon",
+    sys_material_blur: "Rozmazanie pozadia",
     sys_material_blur_desc:
-        "Upravte polomer rozmazania pozadia; nižšie hodnoty ukážu viac obsahu pod oknom",
+        "Upravte polomer rozmazania materiálu; vyššie hodnoty viac rozmažú obsah pod oknom",
     sys_center_nav: "Vycentrovať bočný panel",
     sys_center_nav_desc: "Vertikálne vycentrovať karty bočného panela ako skupinu",
 

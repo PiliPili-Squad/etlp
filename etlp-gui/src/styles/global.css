@@ -17,7 +17,8 @@
     --titlebar-h: 68px;
     --material-opacity: 1;
     --material-opacity-percent: 100%;
-    --material-blur: 7px;
+    --material-density: 0;
+    --material-blur: 9px;
     --material-surface: rgba(224, 232, 236, 0.74);
 
     --window-bg: rgba(218, 226, 231, 0.72);
@@ -74,14 +75,14 @@
         --window-bg: rgba(31, 36, 49, 0.72);
         --window-tint: rgba(31, 36, 49, 0.48);
         --pane-bg: rgba(31, 36, 49, 0.58);
-        --material-surface: rgba(31, 36, 49, 0.86);
+        --material-surface: rgba(31, 36, 49, 0.9);
         --sidebar-bg: var(--pane-bg);
         --pane-border: rgba(216, 238, 245, 0.03);
         --bg: var(--window-bg);
-        --surface: rgba(20, 24, 32, 0.78);
-        --surface-alt: rgba(24, 28, 37, 0.66);
+        --surface: rgba(20, 24, 32, 0.84);
+        --surface-alt: rgba(24, 28, 37, 0.74);
         --surface-hover: rgba(255, 255, 255, 0.062);
-        --surface-strong: rgba(20, 24, 32, 0.82);
+        --surface-strong: rgba(20, 24, 32, 0.88);
         --overview-meta-bg: rgba(34, 38, 46, 0.82);
         --bg-2: var(--surface-alt);
         --bg-hover: var(--surface-hover);
@@ -117,14 +118,14 @@
     --window-bg: rgba(31, 36, 49, 0.72);
     --window-tint: rgba(31, 36, 49, 0.48);
     --pane-bg: rgba(31, 36, 49, 0.58);
-    --material-surface: rgba(31, 36, 49, 0.86);
+    --material-surface: rgba(31, 36, 49, 0.9);
     --sidebar-bg: var(--pane-bg);
     --pane-border: rgba(216, 238, 245, 0.03);
     --bg: var(--window-bg);
-    --surface: rgba(20, 24, 32, 0.78);
-    --surface-alt: rgba(24, 28, 37, 0.66);
+    --surface: rgba(20, 24, 32, 0.84);
+    --surface-alt: rgba(24, 28, 37, 0.74);
     --surface-hover: rgba(255, 255, 255, 0.062);
-    --surface-strong: rgba(20, 24, 32, 0.82);
+    --surface-strong: rgba(20, 24, 32, 0.88);
     --overview-meta-bg: rgba(34, 38, 46, 0.82);
     --bg-2: var(--surface-alt);
     --bg-hover: var(--surface-hover);
@@ -195,24 +196,39 @@ body.platform-linux {
     flex-direction: column;
     position: relative;
     height: 100%;
-    background: color-mix(
-        in srgb,
-        var(--window-bg) var(--material-opacity-percent),
-        transparent
-    );
+    isolation: isolate;
+    background: transparent;
     overflow: hidden;
     border-radius: 12px;
     border: none;
     box-shadow: inset 0 0 0 1px rgba(216, 238, 245, 0.02);
 }
 
-/* macOS: remove solid background so vibrancy shows through */
-body.platform-macos .app {
+.app::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background: color-mix(
         in srgb,
-        var(--window-tint) var(--material-opacity-percent),
+        var(--material-surface) var(--material-opacity-percent),
         transparent
     );
+}
+
+.app.live-backdrop::before {
+    backdrop-filter: blur(var(--material-blur));
+    -webkit-backdrop-filter: blur(var(--material-blur));
+}
+
+.app::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: rgba(31, 36, 49, calc(var(--material-density) * 0.18));
 }
 
 .app.window-focused {
@@ -232,40 +248,6 @@ body.platform-macos .app {
     filter: brightness(0.94) saturate(0.94);
 }
 
-body.platform-macos .app.window-focused,
-body.platform-macos .app.window-blurred {
-    background: color-mix(
-        in srgb,
-        var(--window-tint) var(--material-opacity-percent),
-        transparent
-    );
-}
-
-body.platform-macos .app.liquid-glass-enabled.window-focused {
-    --window-bg: rgba(31, 36, 49, 0.46);
-    --window-tint: rgba(31, 36, 49, 0.3);
-    --pane-bg: rgba(31, 36, 49, 0);
-    --surface: rgba(20, 24, 32, 0.58);
-    --surface-alt: rgba(24, 28, 37, 0.44);
-    --surface-strong: rgba(20, 24, 32, 0.62);
-    --overview-meta-bg: rgba(34, 38, 46, 0.62);
-}
-
-body.platform-macos .app.liquid-glass-enabled.window-blurred {
-    --window-bg: rgba(27, 31, 42, 0.42);
-    --window-tint: rgba(27, 31, 42, 0.26);
-    --pane-bg: rgba(27, 31, 42, 0);
-    --surface: rgba(20, 24, 32, 0.54);
-    --surface-alt: rgba(24, 28, 37, 0.4);
-    --surface-strong: rgba(20, 24, 32, 0.58);
-    --overview-meta-bg: rgba(34, 38, 46, 0.58);
-}
-
-body.platform-macos .app.liquid-glass-enabled .titlebar,
-body.platform-macos .app.liquid-glass-enabled .body {
-    background: transparent;
-}
-
 body.platform-windows .app {
     border-radius: 0;
     border: none;
@@ -283,11 +265,7 @@ body.platform-windows .app {
     user-select: none;
     flex-shrink: 0;
     border-bottom: none;
-    background: color-mix(
-        in srgb,
-        var(--sidebar-bg) var(--material-opacity-percent),
-        transparent
-    );
+    background: transparent;
     gap: 9px;
 }
 
@@ -394,11 +372,7 @@ body:not(.platform-macos) .titlebar {
     display: flex;
     flex: 1;
     min-height: 0;
-    background: color-mix(
-        in srgb,
-        var(--material-surface) var(--material-opacity-percent),
-        transparent
-    );
+    background: transparent;
     contain: layout paint;
 }
 
@@ -417,6 +391,10 @@ body:not(.platform-macos) .titlebar {
     -webkit-app-region: drag;
 }
 
+body.platform-macos .app.brand-hidden .sidebar {
+    padding-top: 54px;
+}
+
 .sidebar .brand-block {
     margin: 5px 6px 8px;
     padding: 0 10px;
@@ -424,6 +402,14 @@ body:not(.platform-macos) .titlebar {
 
 body.platform-windows .sidebar {
     padding-top: 6px;
+}
+
+body.platform-windows .app.brand-hidden .sidebar {
+    padding-top: 42px;
+}
+
+body.platform-linux .app.brand-hidden .sidebar {
+    padding-top: 22px;
 }
 
 .sidebar-section-label {
@@ -581,6 +567,15 @@ body.platform-windows .content {
     box-shadow: var(--shadow-sm);
     overflow: hidden;
     margin-bottom: 14px;
+}
+
+.row-disabled {
+    opacity: 0.56;
+}
+
+.row-disabled .row-label,
+.row-disabled .row-control {
+    pointer-events: none;
 }
 
 .settings-group-title {

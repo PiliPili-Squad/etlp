@@ -147,11 +147,6 @@ export const it: typeof zhCN = {
     sys_theme_light: "Chiaro",
     sys_theme_dark: "Scuro",
     sys_lang_system: "Sistema",
-    sys_liquid_glass: "Liquid Glass (sperimentale)",
-    sys_liquid_glass_desc:
-        "Usa il materiale finestra Liquid Glass di macOS 26; riavvia l’app per applicare le modifiche",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass non è supportato su questo sistema, quindi l’opzione è disattivata",
     sys_display: "Schermo",
     sys_font_size: "Dimensione carattere",
     sys_font_size_desc: "Regola la dimensione del testo dell'interfaccia",
@@ -413,10 +408,13 @@ export const it: typeof zhCN = {
     sys_app_icon_invalid: "Scegli un'immagine PNG valida",
     sys_material_opacity: "Opacità materiale",
     sys_material_opacity_desc:
-        "Valori più bassi rendono sfondi e schede più trasparenti senza sbiadire il testo",
-    sys_material_blur: "Texture satinata",
+        "50% mantiene l'aspetto predefinito; a sinistra più trasparente, a destra più denso",
+    sys_live_backdrop: "Sfocatura sfondo in tempo reale",
+    sys_live_backdrop_desc:
+        "Disattivata usa un materiale statico per mantenere stabile lo scorrimento; attivata sfoca davvero il contenuto dietro la finestra e richiede più prestazioni",
+    sys_material_blur: "Sfocatura sfondo",
     sys_material_blur_desc:
-        "Regola il raggio di sfocatura dello sfondo; valori più bassi mostrano più contenuto sotto la finestra",
+        "Regola il raggio di sfocatura del materiale; valori più alti sfocano di più il contenuto sottostante",
     sys_center_nav: "Centra barra laterale",
     sys_center_nav_desc:
         "Centra verticalmente le schede della barra laterale come gruppo",

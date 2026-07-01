@@ -144,10 +144,6 @@ export const th: typeof zhCN = {
     sys_theme_light: "สว่าง",
     sys_theme_dark: "มืด",
     sys_lang_system: "ระบบ",
-    sys_liquid_glass: "Liquid Glass (ทดลอง)",
-    sys_liquid_glass_desc:
-        "ใช้วัสดุหน้าต่าง Liquid Glass ของ macOS 26; รีสตาร์ตแอปเพื่อใช้การเปลี่ยนแปลง",
-    sys_liquid_glass_unavailable: "ระบบนี้ไม่รองรับ Liquid Glass จึงปิดใช้งานตัวเลือกนี้",
     sys_display: "การแสดงผล",
     sys_font_size: "ขนาดตัวอักษร",
     sys_font_size_desc: "ปรับขนาดข้อความของส่วนติดต่อ",
@@ -394,10 +390,12 @@ export const th: typeof zhCN = {
     sys_app_icon_invalid: "โปรดเลือกภาพ PNG ที่ถูกต้อง",
     sys_material_opacity: "ความทึบของวัสดุ",
     sys_material_opacity_desc:
-        "ค่าที่ต่ำลงทำให้พื้นหลังและการ์ดโปร่งขึ้นโดยไม่ทำให้ข้อความจาง",
-    sys_material_blur: "ผิวสัมผัสแบบฝ้า",
-    sys_material_blur_desc:
-        "ปรับรัศมีเบลอของพื้นหลัง ค่ายิ่งต่ำยิ่งเห็นเนื้อหาใต้หน้าต่างมากขึ้น",
+        "50% คือรูปลักษณ์เริ่มต้น เลื่อนไปทางซ้ายเพื่อให้โปร่งใสมากขึ้น หรือไปทางขวาเพื่อให้วัสดุทึบขึ้น",
+    sys_live_backdrop: "เบลอพื้นหลังแบบเรียลไทม์",
+    sys_live_backdrop_desc:
+        "เมื่อปิดจะใช้วัสดุแบบคงที่เพื่อให้การเลื่อนเสถียร เมื่อเปิดจะเบลอเนื้อหาด้านหลังหน้าต่างจริงและต้องใช้ประสิทธิภาพสูงขึ้น",
+    sys_material_blur: "เบลอพื้นหลัง",
+    sys_material_blur_desc: "ปรับรัศมีเบลอของวัสดุ ค่ายิ่งสูงเนื้อหาใต้หน้าต่างยิ่งเบลอ",
     sys_center_nav: "จัดกึ่งกลางแถบด้านข้าง",
     sys_center_nav_desc: "จัดกึ่งกลางแท็บแถบด้านข้างในแนวตั้งเป็นกลุ่ม",
 

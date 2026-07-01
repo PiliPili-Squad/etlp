@@ -147,11 +147,6 @@ export const de: typeof zhCN = {
     sys_theme_light: "Hell",
     sys_theme_dark: "Dunkel",
     sys_lang_system: "System",
-    sys_liquid_glass: "Liquid Glass (experimentell)",
-    sys_liquid_glass_desc:
-        "Liquid-Glass-Fenstermaterial von macOS 26 verwenden; starte die App neu, damit Änderungen wirksam werden",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass wird auf diesem System nicht unterstützt, daher ist diese Option deaktiviert",
     sys_display: "Anzeige",
     sys_font_size: "Schriftgröße",
     sys_font_size_desc: "Die Textgröße der Oberfläche anpassen",
@@ -415,12 +410,15 @@ export const de: typeof zhCN = {
     sys_app_icon_too_small:
         "Bildauflösung ist zu niedrig ({size}); mindestens 512x512 erforderlich",
     sys_app_icon_invalid: "Bitte ein gültiges PNG-Bild wählen",
-    sys_material_opacity: "Materialtransparenz",
+    sys_material_opacity: "Materialdeckkraft",
     sys_material_opacity_desc:
-        "Niedrigere Werte machen Hintergründe und Karten transparenter, ohne Text auszublenden",
-    sys_material_blur: "Frost-Textur",
+        "50% behält die Standardoptik; nach links wird es transparenter, nach rechts dichter",
+    sys_live_backdrop: "Live-Hintergrundunschärfe",
+    sys_live_backdrop_desc:
+        "Aus verwendet ein statisches Material für stabiles Scrollen; ein verwischt den Inhalt hinter dem Fenster wirklich und benötigt mehr Leistung",
+    sys_material_blur: "Hintergrundunschärfe",
     sys_material_blur_desc:
-        "Passt den Hintergrund-Weichzeichner an; niedrigere Werte zeigen mehr Inhalt unter dem Fenster",
+        "Passt den Unschärferadius des Materials an; höhere Werte verwischen den Inhalt darunter stärker",
     sys_center_nav: "Seitenleiste zentrieren",
     sys_center_nav_desc: "Die Tabs der Seitenleiste als Gruppe vertikal zentrieren",
 

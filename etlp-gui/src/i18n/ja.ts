@@ -142,11 +142,6 @@ export const ja: typeof zhCN = {
     sys_theme_light: "ライト",
     sys_theme_dark: "ダーク",
     sys_lang_system: "システム",
-    sys_liquid_glass: "Liquid Glass（実験的）",
-    sys_liquid_glass_desc:
-        "macOS 26 の Liquid Glass ウィンドウ素材を使用します。変更の適用にはアプリの再起動が必要です",
-    sys_liquid_glass_unavailable:
-        "このシステムでは Liquid Glass がサポートされていないため、このオプションは無効です",
     sys_display: "表示",
     sys_font_size: "フォントサイズ",
     sys_font_size_desc: "UI のテキストサイズを調整します",
@@ -393,12 +388,15 @@ export const ja: typeof zhCN = {
     sys_app_icon_reset_done: "既定のアイコンに戻しました",
     sys_app_icon_too_small: "画像の解像度が低すぎます（{size}）。512x512 以上が必要です",
     sys_app_icon_invalid: "有効な PNG 画像を選択してください",
-    sys_material_opacity: "マテリアル透明度",
+    sys_material_opacity: "マテリアル不透明度",
     sys_material_opacity_desc:
-        "値を下げると背景とカードがより透け、文字の透明度は変わりません",
-    sys_material_blur: "フロスト質感",
+        "50% が既定の見た目です。左に動かすとより透明に、右に動かすとより濃くなります",
+    sys_live_backdrop: "リアルタイム背景ぼかし",
+    sys_live_backdrop_desc:
+        "オフのときは静的なマテリアルでスクロールを安定させます。オンにするとウィンドウ背後の内容を実際にぼかすため、より高い性能が必要です",
+    sys_material_blur: "背景ぼかし",
     sys_material_blur_desc:
-        "背景のぼかし半径を調整します。値が小さいほどウィンドウ下の内容が見えます",
+        "マテリアルのぼかし半径を調整します。値が大きいほど下の内容が強くぼけます",
     sys_center_nav: "サイドバーを中央寄せ",
     sys_center_nav_desc: "サイドバーのタブをグループとして垂直方向に中央寄せします",
 

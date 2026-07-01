@@ -146,11 +146,6 @@ export const pl: typeof zhCN = {
     sys_theme_light: "Jasny",
     sys_theme_dark: "Ciemny",
     sys_lang_system: "Systemowy",
-    sys_liquid_glass: "Liquid Glass (eksperymentalne)",
-    sys_liquid_glass_desc:
-        "Użyj materiału okna Liquid Glass z macOS 26; uruchom aplikację ponownie, aby zastosować zmiany",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass nie jest obsługiwany w tym systemie, więc ta opcja jest wyłączona",
     sys_display: "Wyświetlacz",
     sys_font_size: "Rozmiar czcionki",
     sys_font_size_desc: "Dostosuj rozmiar tekstu interfejsu",
@@ -414,10 +409,13 @@ export const pl: typeof zhCN = {
     sys_app_icon_invalid: "Wybierz prawidłowy obraz PNG",
     sys_material_opacity: "Nieprzezroczystość materiału",
     sys_material_opacity_desc:
-        "Niższe wartości zwiększają przezroczystość tła i kart bez wygaszania tekstu",
-    sys_material_blur: "Matowa tekstura",
+        "50% zachowuje domyślny wygląd; w lewo bardziej przezroczysty, w prawo gęstszy materiał",
+    sys_live_backdrop: "Rozmycie tła na żywo",
+    sys_live_backdrop_desc:
+        "Po wyłączeniu używa statycznego materiału, aby przewijanie było stabilne; po włączeniu naprawdę rozmywa treść za oknem i wymaga większej wydajności",
+    sys_material_blur: "Rozmycie tła",
     sys_material_blur_desc:
-        "Dostosuj promień rozmycia tła; niższe wartości pokazują więcej treści pod oknem",
+        "Dostosuj promień rozmycia materiału; wyższe wartości mocniej rozmywają treść pod oknem",
     sys_center_nav: "Wyśrodkuj pasek boczny",
     sys_center_nav_desc: "Wyśrodkuj pionowo karty paska bocznego jako grupę",
 

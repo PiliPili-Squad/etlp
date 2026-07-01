@@ -405,7 +405,6 @@ export interface UpdateInfo {
 
 interface ShellConfig {
     check_update: boolean;
-    liquid_glass: boolean;
 }
 
 interface CustomIconInfo {
@@ -524,7 +523,6 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
     const [update, setUpdate] = useState<UpdateInfo | null>(null);
     const [windowFocused, setWindowFocused] = useState(true);
     const [customIconUrl, setCustomIconUrl] = useState<string | null>(null);
-    const [liquidGlassEnabled, setLiquidGlassEnabled] = useState(false);
     const toastIdRef = useRef(0);
     const brandName = display.customBrandName.trim() || t("app_name");
     const appIconUrl = customIconUrl ?? DEFAULT_APP_ICON;
@@ -547,7 +545,6 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
             autoUpdateChecked = true;
             try {
                 const cfg = await invoke<ShellConfig>("get_config");
-                if (!cancelled) setLiquidGlassEnabled(cfg.liquid_glass);
                 if (!cfg.check_update) return;
                 const info = await invoke<UpdateInfo>("check_update");
                 if (cancelled || !info.has_update) return;
@@ -566,18 +563,6 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
         return () => {
             cancelled = true;
             clearTimeout(id);
-        };
-    }, []);
-
-    useEffect(() => {
-        let cancelled = false;
-        invoke<ShellConfig>("get_config")
-            .then((cfg) => {
-                if (!cancelled) setLiquidGlassEnabled(cfg.liquid_glass);
-            })
-            .catch(() => {});
-        return () => {
-            cancelled = true;
         };
     }, []);
 
@@ -711,12 +696,15 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
         },
     ];
 
+    const appClass = [
+        "app",
+        windowFocused ? "window-focused" : "window-blurred",
+        display.showBrandLogo ? "brand-visible" : "brand-hidden",
+        display.liveBackdropBlur ? "live-backdrop" : "static-material",
+    ].join(" ");
+
     return (
-        <div
-            className={`app ${windowFocused ? "window-focused" : "window-blurred"}${
-                liquidGlassEnabled ? " liquid-glass-enabled" : ""
-            }`}
-        >
+        <div className={appClass}>
             {isMac && display.showBrandLogo && (
                 // data-tauri-drag-region activates Tauri's JS drag API
                 // (core:window:allow-start-dragging) on mousedown, bypassing
@@ -773,7 +761,6 @@ function AppInner({ display, onDisplayChange }: AppInnerProps) {
                             customIconUrl={customIconUrl}
                             onCustomIconChange={setCustomIconUrl}
                             onAbout={() => setShowAbout(true)}
-                            onLiquidGlassChange={setLiquidGlassEnabled}
                         />
                     )}
                     {/* Logs stays mounted so its buffer survives tab switches;

@@ -146,11 +146,6 @@ export const pt: typeof zhCN = {
     sys_theme_light: "Claro",
     sys_theme_dark: "Escuro",
     sys_lang_system: "Sistema",
-    sys_liquid_glass: "Liquid Glass (experimental)",
-    sys_liquid_glass_desc:
-        "Usar o material de janela Liquid Glass do macOS 26; reinicie a aplicação para aplicar as alterações",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass não é suportado neste sistema, por isso esta opção está desativada",
     sys_display: "Ecrã",
     sys_font_size: "Tamanho da letra",
     sys_font_size_desc: "Ajustar o tamanho do texto da interface",
@@ -414,10 +409,13 @@ export const pt: typeof zhCN = {
     sys_app_icon_invalid: "Escolha uma imagem PNG válida",
     sys_material_opacity: "Opacidade do material",
     sys_material_opacity_desc:
-        "Valores mais baixos tornam fundos e cartões mais transparentes sem desvanecer o texto",
-    sys_material_blur: "Textura fosca",
+        "50% mantém o visual padrão; à esquerda fica mais transparente, à direita mais denso",
+    sys_live_backdrop: "Desfoque do fundo em tempo real",
+    sys_live_backdrop_desc:
+        "Desativado usa material estático para manter o deslocamento estável; ativado desfoca realmente o conteúdo atrás da janela e exige mais desempenho",
+    sys_material_blur: "Desfoque do fundo",
     sys_material_blur_desc:
-        "Ajusta o raio de desfocagem do fundo; valores mais baixos mostram mais conteúdo sob a janela",
+        "Ajusta o raio de desfoque do material; valores mais altos desfocam mais o conteúdo por baixo",
     sys_center_nav: "Centrar barra lateral",
     sys_center_nav_desc:
         "Centrar verticalmente os separadores da barra lateral como grupo",

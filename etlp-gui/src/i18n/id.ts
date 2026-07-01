@@ -146,11 +146,6 @@ export const id: typeof zhCN = {
     sys_theme_light: "Terang",
     sys_theme_dark: "Gelap",
     sys_lang_system: "Sistem",
-    sys_liquid_glass: "Liquid Glass (Eksperimental)",
-    sys_liquid_glass_desc:
-        "Gunakan material jendela Liquid Glass macOS 26; mulai ulang aplikasi untuk menerapkan perubahan",
-    sys_liquid_glass_unavailable:
-        "Liquid Glass tidak didukung di sistem ini, jadi opsi ini dinonaktifkan",
     sys_display: "Layar",
     sys_font_size: "Ukuran Font",
     sys_font_size_desc: "Sesuaikan ukuran teks antarmuka",
@@ -409,10 +404,13 @@ export const id: typeof zhCN = {
     sys_app_icon_invalid: "Pilih gambar PNG yang valid",
     sys_material_opacity: "Opasitas Material",
     sys_material_opacity_desc:
-        "Nilai lebih rendah membuat latar dan kartu lebih transparan tanpa memudarkan teks",
-    sys_material_blur: "Tekstur Buram",
+        "50% mempertahankan tampilan default; geser ke kiri agar lebih transparan atau ke kanan agar lebih padat",
+    sys_live_backdrop: "Blur Latar Langsung",
+    sys_live_backdrop_desc:
+        "Saat mati, aplikasi memakai material statis agar scroll tetap stabil; saat aktif, konten di balik jendela benar-benar diblur dan membutuhkan performa lebih tinggi",
+    sys_material_blur: "Blur Latar",
     sys_material_blur_desc:
-        "Sesuaikan radius blur latar; nilai lebih rendah menampilkan lebih banyak konten di bawah jendela",
+        "Sesuaikan radius blur material; nilai lebih tinggi membuat konten di bawah jendela lebih buram",
     sys_center_nav: "Pusatkan Sidebar",
     sys_center_nav_desc: "Pusatkan tab sidebar secara vertikal sebagai grup",
 
