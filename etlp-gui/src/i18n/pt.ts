@@ -435,6 +435,7 @@ export const pt: typeof zhCN = {
     logs_mpv: "Registo do mpv",
     logs_filter: "Filtrar…",
     logs_clear: "Limpar",
+    logs_clearing: "A limpar…",
     logs_bottom: "↓ Fundo",
     logs_empty: "À espera da saída do registo…",
     logs_no_mpv:

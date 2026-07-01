@@ -417,6 +417,7 @@ export const ar: typeof zhCN = {
     logs_mpv: "سجل mpv",
     logs_filter: "تصفية…",
     logs_clear: "مسح",
+    logs_clearing: "جارٍ المسح…",
     logs_bottom: "↓ الأسفل",
     logs_empty: "بانتظار مخرجات السجل…",
     logs_no_mpv: "لم يُعثر على سجل mpv — انقر «اختيار سجل mpv» لتحميل واحد",

@@ -398,6 +398,7 @@ export const zhTW: typeof zhCN = {
     logs_mpv: "mpv 日誌",
     logs_filter: "篩選…",
     logs_clear: "清空",
+    logs_clearing: "清空中…",
     logs_bottom: "↓ 底部",
     logs_empty: "等待日誌輸出…",
     logs_no_mpv: "未偵測到 mpv 日誌，點擊「選擇 mpv 日誌」載入",

@@ -429,6 +429,7 @@ export const ru: typeof zhCN = {
     logs_mpv: "Журнал mpv",
     logs_filter: "Фильтр…",
     logs_clear: "Очистить",
+    logs_clearing: "Очистка…",
     logs_bottom: "↓ Вниз",
     logs_empty: "Ожидание вывода журнала…",
     logs_no_mpv:

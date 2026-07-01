@@ -434,6 +434,7 @@ export const pl: typeof zhCN = {
     logs_mpv: "Dziennik mpv",
     logs_filter: "Filtruj…",
     logs_clear: "Wyczyść",
+    logs_clearing: "Czyszczenie…",
     logs_bottom: "↓ Na dół",
     logs_empty: "Oczekiwanie na dane wyjściowe dziennika…",
     logs_no_mpv:

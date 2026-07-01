@@ -415,6 +415,7 @@ export const ja: typeof zhCN = {
     logs_mpv: "mpv ログ",
     logs_filter: "フィルター…",
     logs_clear: "クリア",
+    logs_clearing: "クリア中…",
     logs_bottom: "↓ 最下部",
     logs_empty: "ログ出力を待機中…",
     logs_no_mpv:

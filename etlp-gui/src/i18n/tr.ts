@@ -424,6 +424,7 @@ export const tr: typeof zhCN = {
     logs_mpv: "mpv Günlüğü",
     logs_filter: "Filtrele…",
     logs_clear: "Temizle",
+    logs_clearing: "Temizleniyor…",
     logs_bottom: "↓ Alta Git",
     logs_empty: "Günlük çıktısı bekleniyor…",
     logs_no_mpv: "mpv günlüğü bulunamadı — yüklemek için 'mpv Günlüğü Seç'e tıklayın",

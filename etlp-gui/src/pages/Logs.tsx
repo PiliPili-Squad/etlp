@@ -225,6 +225,7 @@ export default function Logs({
     const [paths, setPaths] = useState<LogPaths | null>(null);
     const [loadingOlder, setLoadingOlder] = useState(false);
     const [hasOlder, setHasOlder] = useState(false);
+    const [clearing, setClearing] = useState(false);
     // A user-picked mpv log file; falls back to the config-derived default.
     // Restored from localStorage so a manual pick survives a restart and keeps
     // priority over the default until the user resets it.
@@ -413,11 +414,13 @@ export default function Logs({
     // Empty the active log file on disk, then reset the view to match. The live
     // poll keeps running and will pick up anything written afterwards.
     const clearLog = useCallback(async () => {
+        if (clearing) return;
         const logPath = source === "mpv" ? effectiveMpvPath : null;
         if (source === "mpv" && !logPath) {
             setLines([]);
             return;
         }
+        setClearing(true);
         try {
             await invoke("clear_log_file", { path: logPath });
         } catch (error) {
@@ -434,13 +437,15 @@ export default function Logs({
                   : t("logs_clear_failed");
             addToast(detail, true);
             return;
+        } finally {
+            setClearing(false);
         }
         setLines([]);
         posRef.current = 0;
         oldestRef.current = 0;
         setHasOlder(false);
         setAutoScroll(true);
-    }, [source, effectiveMpvPath, paths?.app_log, addToast, t]);
+    }, [clearing, source, effectiveMpvPath, paths?.app_log, addToast, t]);
 
     // Reset the buffer when the log source changes (cleanup runs before the
     // polling effect restarts), so a source swap drops the old file's lines.
@@ -735,8 +740,9 @@ export default function Logs({
                         <button
                             className="btn log-toolbar-btn"
                             onClick={() => void clearLog()}
+                            disabled={clearing}
                         >
-                            {t("logs_clear")}
+                            {clearing ? t("logs_clearing") : t("logs_clear")}
                         </button>
                         {!autoScroll && (
                             <button

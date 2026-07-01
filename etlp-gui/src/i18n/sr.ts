@@ -423,6 +423,7 @@ export const sr: typeof zhCN = {
     logs_mpv: "mpv лог",
     logs_filter: "Филтрирај…",
     logs_clear: "Очисти",
+    logs_clearing: "Чишћење…",
     logs_bottom: "↓ На дно",
     logs_empty: "Чека се испис лога…",
     logs_no_mpv: "mpv лог није пронађен — кликните 'Изабери mpv лог' за учитавање",

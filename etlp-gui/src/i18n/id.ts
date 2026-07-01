@@ -428,6 +428,7 @@ export const id: typeof zhCN = {
     logs_mpv: "Log mpv",
     logs_filter: "Filter…",
     logs_clear: "Bersihkan",
+    logs_clearing: "Membersihkan…",
     logs_bottom: "↓ Ke Bawah",
     logs_empty: "Menunggu output log…",
     logs_no_mpv: "Log mpv tidak ditemukan — klik 'Pilih Log mpv' untuk memuat",

@@ -443,6 +443,7 @@ export const en: typeof zhCN = {
     logs_mpv: "mpv Log",
     logs_filter: "Filter…",
     logs_clear: "Clear",
+    logs_clearing: "Clearing…",
     logs_clear_failed: "Failed to clear log",
     logs_clear_failed_detail: "Failed to clear log: {kind}, stage: {stage}, path: {path}",
     logs_bottom: "↓ Bottom",

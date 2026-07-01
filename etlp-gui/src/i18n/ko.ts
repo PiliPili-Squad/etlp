@@ -415,6 +415,7 @@ export const ko: typeof zhCN = {
     logs_mpv: "mpv 로그",
     logs_filter: "필터…",
     logs_clear: "지우기",
+    logs_clearing: "지우는 중…",
     logs_bottom: "↓ 맨 아래",
     logs_empty: "로그 출력을 기다리는 중…",
     logs_no_mpv: 'mpv 로그를 찾을 수 없습니다 — "mpv 로그 선택"을 클릭하여 불러오세요',

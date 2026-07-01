@@ -413,6 +413,7 @@ export const th: typeof zhCN = {
     logs_mpv: "บันทึก mpv",
     logs_filter: "กรอง…",
     logs_clear: "ล้าง",
+    logs_clearing: "กำลังล้าง…",
     logs_bottom: "↓ ไปด้านล่าง",
     logs_empty: "รอผลลัพธ์บันทึก…",
     logs_no_mpv: "ไม่พบบันทึก mpv — คลิก 'เลือกบันทึก mpv' เพื่อโหลด",

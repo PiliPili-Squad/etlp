@@ -429,6 +429,7 @@ export const sk: typeof zhCN = {
     logs_mpv: "Záznam mpv",
     logs_filter: "Filtrovať…",
     logs_clear: "Vymazať",
+    logs_clearing: "Vymazáva sa…",
     logs_bottom: "↓ Dole",
     logs_empty: "Čaká sa na výstup záznamu…",
     logs_no_mpv:

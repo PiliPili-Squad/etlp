@@ -442,6 +442,7 @@ export const fr: typeof zhCN = {
     logs_mpv: "Journal mpv",
     logs_filter: "Filtrer…",
     logs_clear: "Effacer",
+    logs_clearing: "Effacement…",
     logs_bottom: "↓ Bas",
     logs_empty: "En attente de la sortie des journaux…",
     logs_no_mpv:

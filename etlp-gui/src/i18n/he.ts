@@ -407,6 +407,7 @@ export const he: typeof zhCN = {
     logs_mpv: "יומן mpv",
     logs_filter: "סנן…",
     logs_clear: "נקה",
+    logs_clearing: "מנקה…",
     logs_bottom: "↓ לתחתית",
     logs_empty: "ממתין לפלט יומן…",
     logs_no_mpv: "יומן mpv לא נמצא — לחץ 'בחר יומן mpv' לטעינה",
