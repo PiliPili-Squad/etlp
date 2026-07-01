@@ -383,13 +383,6 @@ body.platform-windows .sidebar {
     padding-top: 6px;
 }
 
-/* Optional: vertically center the nav block as a group. `safe` falls back to
-   top-alignment when the items are taller than the sidebar, so nothing is ever
-   clipped out of reach. */
-html[data-center-nav="true"] .sidebar {
-    justify-content: safe center;
-}
-
 .sidebar-section-label {
     font-size: 10.5px;
     font-weight: 600;

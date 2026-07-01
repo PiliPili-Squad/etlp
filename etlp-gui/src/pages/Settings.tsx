@@ -2263,12 +2263,6 @@ function SystemSection({
                     value={display.accentColor ?? "blue"}
                     onChange={(v) => onDisplayChange({ accentColor: v })}
                 />
-                <ToggleRow
-                    label={t("sys_center_nav")}
-                    desc={t("sys_center_nav_desc")}
-                    checked={display.centerNav ?? false}
-                    onChange={(v) => onDisplayChange({ centerNav: v })}
-                />
                 {platform === "macos" && (
                     <ToggleRow
                         label={t("sys_liquid_glass")}

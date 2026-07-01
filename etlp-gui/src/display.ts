@@ -79,7 +79,7 @@ export interface DisplaySettings {
     zoom: number;
     fontFamily: string;
     accentColor: AccentColor;
-    /** Vertically center the sidebar nav items as a group (default: top-aligned). */
+    /** Deprecated local preference. Always coerced to false on load. */
     centerNav: boolean;
 }
 
@@ -110,7 +110,9 @@ export function defaultDisplay(): DisplaySettings {
 export function loadDisplay(): DisplaySettings {
     try {
         const raw = localStorage.getItem("etlp-display");
-        if (raw) return { ...defaultDisplay(), ...JSON.parse(raw) };
+        if (raw) {
+            return { ...defaultDisplay(), ...JSON.parse(raw), centerNav: false };
+        }
     } catch {
         /* ignore */
     }
@@ -138,7 +140,7 @@ export function applyDisplay(s: DisplaySettings) {
     const [, dark, soft] = ACCENT_PALETTES[s.accentColor ?? "blue"];
     root.style.setProperty("--accent", dark);
     root.style.setProperty("--accent-soft", soft);
-    root.setAttribute("data-center-nav", s.centerNav ? "true" : "false");
+    root.removeAttribute("data-center-nav");
 
     const computed = getComputedStyle(root);
     console.debug(
