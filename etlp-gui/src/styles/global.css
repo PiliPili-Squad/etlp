@@ -250,9 +250,10 @@ body.platform-linux {
 }
 
 body.platform-windows .app {
-    border-radius: 12px;
-    clip-path: inset(0 round 12px);
+    border-radius: 0;
+    clip-path: none;
     border: none;
+    box-shadow: none;
 }
 
 /* ── Titlebar ────────────────────────────────────────────────────────── */

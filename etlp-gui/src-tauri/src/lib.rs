@@ -465,32 +465,10 @@ fn apply_window_frame(window: &tauri::WebviewWindow) {
     if let Err(e) = window.set_decorations(false) {
         eprintln!("[etlp] undecorated window: {e}");
     }
-    apply_windows_corner_preference(window);
 }
 
 #[cfg(not(target_os = "windows"))]
 fn apply_window_frame(_window: &tauri::WebviewWindow) {}
-
-#[cfg(target_os = "windows")]
-fn apply_windows_corner_preference(window: &tauri::WebviewWindow) {
-    use windows::Win32::Graphics::Dwm::{
-        DWM_WINDOW_CORNER_PREFERENCE, DWMWA_WINDOW_CORNER_PREFERENCE,
-        DwmSetWindowAttribute,
-    };
-
-    let Ok(hwnd) = window.hwnd() else {
-        return;
-    };
-    let preference = DWM_WINDOW_CORNER_PREFERENCE(2);
-    let _ = unsafe {
-        DwmSetWindowAttribute(
-            hwnd,
-            DWMWA_WINDOW_CORNER_PREFERENCE,
-            &preference as *const _ as *const _,
-            std::mem::size_of_val(&preference) as u32,
-        )
-    };
-}
 
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
 fn apply_window_material(_window: &tauri::WebviewWindow) {}
