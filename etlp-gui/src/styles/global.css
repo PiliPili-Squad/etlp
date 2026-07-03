@@ -179,7 +179,7 @@ body,
     height: 100%;
 }
 body {
-    background: transparent;
+    background: var(--material-surface);
     overflow: hidden;
     color: var(--text);
 }
@@ -191,7 +191,6 @@ body.platform-windows {
 }
 body.platform-linux {
     font-family: var(--app-font, "Roboto"), "Roboto", "Noto Sans", system-ui, sans-serif;
-    background: var(--material-surface);
 }
 
 .app {
@@ -200,7 +199,7 @@ body.platform-linux {
     position: relative;
     height: 100%;
     isolation: isolate;
-    background: transparent;
+    background: var(--material-surface);
     overflow: hidden;
     border-radius: 12px;
     clip-path: inset(0 round 12px);
@@ -216,7 +215,7 @@ body.platform-linux {
     pointer-events: none;
     background: color-mix(
         in srgb,
-        var(--material-surface) var(--material-opacity-percent),
+        var(--material-layer-surface) var(--material-opacity-percent),
         transparent
     );
 }
@@ -262,12 +261,6 @@ body.platform-windows .app {
 body.platform-linux .app {
     border-radius: 0;
     clip-path: none;
-    background: var(--material-surface);
-}
-
-body.platform-linux .app::before,
-body.platform-linux .app::after {
-    display: none;
 }
 
 /* ── Titlebar ────────────────────────────────────────────────────────── */
@@ -517,8 +510,8 @@ body.platform-linux .app.brand-hidden .sidebar {
     background: transparent;
 }
 
-body.platform-linux .sidebar,
-body.platform-linux .content {
+.sidebar,
+.content {
     backface-visibility: hidden;
     transform: translateZ(0);
 }
@@ -2196,23 +2189,6 @@ body.platform-macos .body,
 body.platform-windows .body {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-}
-
-body.platform-linux .app {
-    background: color-mix(
-        in srgb,
-        var(--material-surface) var(--material-opacity-percent),
-        transparent
-    );
-}
-
-body.platform-linux .content,
-body.platform-linux .sidebar {
-    background: color-mix(
-        in srgb,
-        var(--material-layer-surface) var(--material-opacity-percent),
-        transparent
-    );
 }
 
 .log-body {

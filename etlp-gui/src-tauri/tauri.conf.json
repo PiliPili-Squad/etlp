@@ -22,7 +22,7 @@
         "visible": false,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "transparent": true
+        "transparent": false
       }
     ],
     "security": {

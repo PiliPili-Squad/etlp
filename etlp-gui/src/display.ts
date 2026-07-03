@@ -169,7 +169,7 @@ export function applyDisplay(s: DisplaySettings) {
     root.setAttribute("dir", isRTL(s.lang) ? "rtl" : "ltr");
 
     // Native webview zoom is applied from App.tsx. Keeping CSS zoom off avoids
-    // WebKitGTK scroll invalidation bugs on transparent Tauri windows.
+    // scroll invalidation bugs in scaled WebView layouts.
     const effectiveZoom = displayZoomFactor(s);
     const materialOpacity = clampNumber(s.materialOpacity, 0, 100, 100);
     root.style.setProperty("--base-font-size", `${s.fontSize}px`);
