@@ -111,13 +111,22 @@ fn augment_path() {}
 
 /// The tray icon asset and whether it should render as a monochrome template.
 ///
-/// All platforms use the same menu-bar glyph as macOS. Only macOS renders it as
-/// a template image so the system can recolour it for light and dark menu bars.
+/// All platforms use the same menu-bar glyph as macOS. macOS renders the black
+/// source as a template image; platforms without template recolouring use the
+/// pre-rendered light glyph so the icon stays visible on dark tray surfaces.
 pub(crate) fn tray_icon_asset() -> (&'static [u8], bool) {
-    (
-        include_bytes!("../icons/tray-icon.png"),
-        cfg!(target_os = "macos"),
-    )
+    #[cfg(target_os = "macos")]
+    {
+        (include_bytes!("../icons/tray-icon.png"), true)
+    }
+    #[cfg(target_os = "linux")]
+    {
+        (include_bytes!("../icons/tray-icon-linux.png"), false)
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    {
+        (include_bytes!("../icons/tray-icon-windows.png"), false)
+    }
 }
 
 /// Decode the bundled tray PNG into `(rgba_bytes, width, height)`.
