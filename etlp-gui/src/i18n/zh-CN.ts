@@ -380,7 +380,7 @@ export const zhCN = {
     sys_brand_name: "品牌名称",
     sys_brand_name_desc: "留空时自动使用内置多语言品牌名",
     sys_app_icon: "自定义图标",
-    sys_app_icon_desc: "选择 PNG 图片作为品牌图标，最低分辨率 512x512",
+    sys_app_icon_desc: "选择 PNG 图片作为窗口内品牌图标，最低分辨率 512x512",
     sys_app_icon_choose: "选择图片",
     sys_app_icon_reset: "恢复默认",
     sys_app_icon_saved: "图标已更新",

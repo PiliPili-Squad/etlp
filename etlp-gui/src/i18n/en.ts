@@ -410,7 +410,7 @@ export const en: typeof zhCN = {
         "Leave empty to use the built-in localized brand name automatically",
     sys_app_icon: "Custom Icon",
     sys_app_icon_desc:
-        "Choose a PNG image for the brand icon; minimum resolution is 512x512",
+        "Choose a PNG image for the in-window brand icon; minimum resolution is 512x512",
     sys_app_icon_choose: "Choose Image",
     sys_app_icon_reset: "Reset",
     sys_app_icon_saved: "Icon updated",

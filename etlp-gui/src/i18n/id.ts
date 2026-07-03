@@ -395,7 +395,7 @@ export const id: typeof zhCN = {
         "Biarkan kosong untuk otomatis memakai nama merek bawaan yang dilokalkan",
     sys_app_icon: "Ikon Kustom",
     sys_app_icon_desc:
-        "Pilih gambar PNG untuk merek dan ikon tray; resolusi minimum 512x512",
+        "Pilih gambar PNG untuk ikon merek di jendela; resolusi minimum 512x512",
     sys_app_icon_choose: "Pilih Gambar",
     sys_app_icon_reset: "Reset",
     sys_app_icon_saved: "Ikon diperbarui",

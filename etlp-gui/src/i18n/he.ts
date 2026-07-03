@@ -375,7 +375,7 @@ export const he: typeof zhCN = {
     sys_brand_name: "שם מותג",
     sys_brand_name_desc: "השאר ריק כדי להשתמש אוטומטית בשם המותג המקומי המובנה",
     sys_app_icon: "סמל מותאם אישית",
-    sys_app_icon_desc: "בחר תמונת PNG למותג ולסמל המגש; רזולוציה מינימלית 512x512",
+    sys_app_icon_desc: "בחר תמונת PNG לסמל המותג בתוך החלון; רזולוציה מינימלית 512x512",
     sys_app_icon_choose: "בחר תמונה",
     sys_app_icon_reset: "איפוס",
     sys_app_icon_saved: "הסמל עודכן",

@@ -385,7 +385,7 @@ export const ar: typeof zhCN = {
     sys_brand_name_desc: "اتركه فارغًا لاستخدام اسم العلامة المحلي المدمج تلقائيًا",
     sys_app_icon: "أيقونة مخصّصة",
     sys_app_icon_desc:
-        "اختر صورة PNG للعلامة وأيقونة شريط النظام؛ الحد الأدنى للدقة 512x512",
+        "اختر صورة PNG لأيقونة العلامة داخل النافذة؛ الحد الأدنى للدقة 512x512",
     sys_app_icon_choose: "اختر صورة",
     sys_app_icon_reset: "إعادة تعيين",
     sys_app_icon_saved: "تم تحديث الأيقونة",

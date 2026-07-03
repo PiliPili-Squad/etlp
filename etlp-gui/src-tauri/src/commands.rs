@@ -7,7 +7,6 @@ use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, AtomicU16, Ordering};
 
-use tauri::Manager as _;
 use tauri::State;
 use tower::Layer;
 use tower_http::normalize_path::NormalizePathLayer;
@@ -90,23 +89,6 @@ fn validate_custom_icon(bytes: &[u8]) -> Result<(Vec<u8>, u32, u32), String> {
         return Err(err_icon_too_small(width, height));
     }
     Ok((rgba, width, height))
-}
-
-fn apply_custom_icon(
-    app: &tauri::AppHandle,
-    rgba: Vec<u8>,
-    width: u32,
-    height: u32,
-) {
-    let icon = tauri::image::Image::new_owned(rgba, width, height);
-
-    if let Some(tray) = app.tray_by_id(crate::TRAY_ICON_ID) {
-        let _ = tray.set_icon_with_as_template(Some(icon.clone()), false);
-    }
-
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.set_icon(icon);
-    }
 }
 
 fn io_error_kind(error: &std::io::Error) -> &'static str {
@@ -955,9 +937,8 @@ pub fn get_custom_app_icon() -> Result<Option<CustomIconInfo>, String> {
 
 /// Pick, validate, persist, and apply a custom PNG app icon.
 ///
-/// The bundled app executable icon cannot be rewritten reliably at runtime on
-/// every platform, so this updates the in-app branding, main window icon, and
-/// tray/menu bar icon immediately while persisting the PNG for the next launch.
+/// The bundled app executable and tray/menu-bar icons stay fixed. The selected
+/// PNG is persisted for the in-window brand header only.
 #[tauri::command]
 pub async fn pick_custom_app_icon(
     app: tauri::AppHandle,
@@ -977,36 +958,19 @@ pub async fn pick_custom_app_icon(
     let src_path = PathBuf::from(src.to_string());
     let bytes =
         std::fs::read(&src_path).map_err(|e| format!("ICON_READ:{e}"))?;
-    let (rgba, width, height) = validate_custom_icon(&bytes)?;
+    validate_custom_icon(&bytes)?;
     let dest = custom_icon_path()?;
     crate::elevated_fs::write_file(&dest, &bytes)
         .map_err(|e| format!("ICON_WRITE:{e}"))?;
-    apply_custom_icon(&app, rgba, width, height);
     Ok(Some(custom_icon_info_from_bytes(&bytes)))
 }
 
-/// Remove the custom icon and restore bundled runtime icons for this session.
+/// Remove the custom brand icon. The tray/menu-bar icon is always fixed.
 #[tauri::command]
-pub fn reset_custom_app_icon(app: tauri::AppHandle) -> Result<(), String> {
+pub fn reset_custom_app_icon() -> Result<(), String> {
     let path = custom_icon_path()?;
     crate::elevated_fs::remove_file_if_exists(&path)
         .map_err(|e| format!("ICON_REMOVE:{e}"))?;
-
-    let (bytes, is_template) = crate::tray_icon_asset();
-    let (rgba, width, height) = crate::decode_png_icon(bytes)
-        .map_err(|e| format!("ICON_INVALID:{e}"))?;
-    let icon = tauri::image::Image::new_owned(rgba, width, height);
-    if let Some(tray) = app.tray_by_id(crate::TRAY_ICON_ID) {
-        let _ = tray.set_icon_with_as_template(Some(icon), is_template);
-    }
-
-    let (rgba, width, height) =
-        crate::decode_png_icon(crate::bundled_app_icon_asset())
-            .map_err(|e| format!("ICON_INVALID:{e}"))?;
-    let icon = tauri::image::Image::new_owned(rgba, width, height);
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.set_icon(icon);
-    }
     Ok(())
 }
 
@@ -2659,10 +2623,9 @@ fn launch_portable_updater(
 
     match std::process::Command::new(updater_exe).args(&args).spawn() {
         Ok(_) => Ok(()),
-        Err(e) if should_retry_with_elevation(&e) => shell_execute_runas(
-            updater_exe,
-            &args,
-        ),
+        Err(e) if should_retry_with_elevation(&e) => {
+            shell_execute_runas(updater_exe, &args)
+        }
         Err(e) => Err(format!("launch updater.exe: {e}")),
     }
 }

@@ -401,7 +401,7 @@ export const pl: typeof zhCN = {
         "Zostaw puste, aby automatycznie użyć wbudowanej zlokalizowanej nazwy",
     sys_app_icon: "Ikona niestandardowa",
     sys_app_icon_desc:
-        "Wybierz obraz PNG dla marki i ikony zasobnika; minimalna rozdzielczość 512x512",
+        "Wybierz obraz PNG dla ikony marki w oknie; minimalna rozdzielczość 512x512",
     sys_app_icon_choose: "Wybierz obraz",
     sys_app_icon_reset: "Resetuj",
     sys_app_icon_saved: "Ikona zaktualizowana",

@@ -408,7 +408,7 @@ export const fr: typeof zhCN = {
         "Laisser vide pour utiliser automatiquement le nom localisé intégré",
     sys_app_icon: "Icône personnalisée",
     sys_app_icon_desc:
-        "Choisir une image PNG pour la marque et l'icône de zone de notification ; résolution minimale 512x512",
+        "Choisir une image PNG pour l'icône de marque dans la fenêtre ; résolution minimale 512x512",
     sys_app_icon_choose: "Choisir une image",
     sys_app_icon_reset: "Réinitialiser",
     sys_app_icon_saved: "Icône mise à jour",

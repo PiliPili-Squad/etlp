@@ -382,7 +382,7 @@ export const ko: typeof zhCN = {
     sys_brand_name_desc: "비워 두면 내장된 다국어 브랜드 이름을 자동으로 사용합니다",
     sys_app_icon: "사용자 지정 아이콘",
     sys_app_icon_desc:
-        "브랜드와 트레이 아이콘에 사용할 PNG 이미지를 선택하세요. 최소 해상도는 512x512입니다",
+        "창 안의 브랜드 아이콘으로 사용할 PNG 이미지를 선택하세요. 최소 해상도는 512x512입니다",
     sys_app_icon_choose: "이미지 선택",
     sys_app_icon_reset: "초기화",
     sys_app_icon_saved: "아이콘이 업데이트되었습니다",

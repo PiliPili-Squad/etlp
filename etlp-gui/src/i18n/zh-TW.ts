@@ -368,7 +368,7 @@ export const zhTW: typeof zhCN = {
     sys_brand_name: "品牌名稱",
     sys_brand_name_desc: "留空時自動使用內建多語言品牌名",
     sys_app_icon: "自訂圖示",
-    sys_app_icon_desc: "選擇 PNG 圖片作為品牌圖示，最低解析度 512x512",
+    sys_app_icon_desc: "選擇 PNG 圖片作為視窗內品牌圖示，最低解析度 512x512",
     sys_app_icon_choose: "選擇圖片",
     sys_app_icon_reset: "恢復預設",
     sys_app_icon_saved: "圖示已更新",

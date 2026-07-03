@@ -404,7 +404,7 @@ export const de: typeof zhCN = {
         "Leer lassen, um automatisch den integrierten lokalisierten Markennamen zu verwenden",
     sys_app_icon: "Benutzerdefiniertes Symbol",
     sys_app_icon_desc:
-        "PNG-Bild für Marke und Tray-Symbol wählen; Mindestauflösung 512x512",
+        "PNG-Bild für das Markenbild im Fenster wählen; Mindestauflösung 512x512",
     sys_app_icon_choose: "Bild wählen",
     sys_app_icon_reset: "Zurücksetzen",
     sys_app_icon_saved: "Symbol aktualisiert",

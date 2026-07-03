@@ -400,7 +400,7 @@ export const it: typeof zhCN = {
         "Lascia vuoto per usare automaticamente il nome localizzato integrato",
     sys_app_icon: "Icona personalizzata",
     sys_app_icon_desc:
-        "Scegli un'immagine PNG per brand e icona nel tray; risoluzione minima 512x512",
+        "Scegli un'immagine PNG per l'icona del brand nella finestra; risoluzione minima 512x512",
     sys_app_icon_choose: "Scegli immagine",
     sys_app_icon_reset: "Ripristina",
     sys_app_icon_saved: "Icona aggiornata",

@@ -401,7 +401,7 @@ export const pt: typeof zhCN = {
         "Deixe vazio para usar automaticamente o nome localizado integrado",
     sys_app_icon: "Ícone personalizado",
     sys_app_icon_desc:
-        "Escolha uma imagem PNG para a marca e o ícone da bandeja; resolução mínima 512x512",
+        "Escolha uma imagem PNG para o ícone da marca na janela; resolução mínima 512x512",
     sys_app_icon_choose: "Escolher imagem",
     sys_app_icon_reset: "Repor",
     sys_app_icon_saved: "Ícone atualizado",

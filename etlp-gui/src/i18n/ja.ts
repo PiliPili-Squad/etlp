@@ -383,7 +383,7 @@ export const ja: typeof zhCN = {
     sys_brand_name_desc: "空のままにすると内蔵の多言語ブランド名を自動的に使用します",
     sys_app_icon: "カスタムアイコン",
     sys_app_icon_desc:
-        "ブランドとトレイアイコンに使う PNG 画像を選択します。最低解像度は 512x512 です",
+        "ウィンドウ内のブランドアイコンに使う PNG 画像を選択してください。最小解像度は 512x512 です",
     sys_app_icon_choose: "画像を選択",
     sys_app_icon_reset: "リセット",
     sys_app_icon_saved: "アイコンを更新しました",

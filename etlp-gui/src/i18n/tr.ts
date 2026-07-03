@@ -391,7 +391,7 @@ export const tr: typeof zhCN = {
         "Yerleşik yerelleştirilmiş marka adını otomatik kullanmak için boş bırakın",
     sys_app_icon: "Özel Simge",
     sys_app_icon_desc:
-        "Marka ve tepsi simgesi için PNG görseli seçin; minimum çözünürlük 512x512",
+        "Pencere içindeki marka simgesi için PNG görseli seçin; minimum çözünürlük 512x512",
     sys_app_icon_choose: "Görsel Seç",
     sys_app_icon_reset: "Sıfırla",
     sys_app_icon_saved: "Simge güncellendi",

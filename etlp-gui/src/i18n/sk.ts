@@ -396,7 +396,7 @@ export const sk: typeof zhCN = {
         "Nechajte prázdne, ak chcete automaticky použiť vstavaný lokalizovaný názov",
     sys_app_icon: "Vlastná ikona",
     sys_app_icon_desc:
-        "Vyberte PNG obrázok pre značku a ikonu v paneli; minimálne rozlíšenie 512x512",
+        "Vyberte obrázok PNG pre ikonu značky v okne; minimálne rozlíšenie 512x512",
     sys_app_icon_choose: "Vybrať obrázok",
     sys_app_icon_reset: "Obnoviť",
     sys_app_icon_saved: "Ikona aktualizovaná",
