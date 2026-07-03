@@ -2,12 +2,18 @@ import { useState, useEffect, useCallback, useRef, type MouseEvent } from "react
 import { usePlatform } from "./hooks/usePlatform";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useI18n } from "./i18n";
 import { I18nProvider } from "./i18n/provider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { type DisplaySettings, loadDisplay, applyDisplay } from "./display";
+import {
+    type DisplaySettings,
+    loadDisplay,
+    applyDisplay,
+    displayZoomFactor,
+} from "./display";
 import Overview from "./pages/Overview";
 import Settings, { type SectionTab } from "./pages/Settings";
 import Logs from "./pages/Logs";
@@ -798,6 +804,14 @@ export default function App() {
     useEffect(() => {
         applyDisplay(display);
         localStorage.setItem("etlp-display", JSON.stringify(display));
+
+        try {
+            void getCurrentWebview()
+                .setZoom(displayZoomFactor(display))
+                .catch(() => {});
+        } catch {
+            // Standalone browser previews do not provide Tauri's webview API.
+        }
     }, [display]);
 
     const updateDisplay = useCallback((patch: Partial<DisplaySettings>) => {

@@ -158,19 +158,22 @@ export function loadDisplay(): DisplaySettings {
     return defaultDisplay();
 }
 
+export function displayZoomFactor(s: DisplaySettings): number {
+    return s.zoom * (s.fontSize / 13);
+}
+
 export function applyDisplay(s: DisplaySettings) {
     const root = document.documentElement;
     // Light mode is not yet ready; force dark unconditionally.
     root.setAttribute("data-theme", "dark");
     root.setAttribute("dir", isRTL(s.lang) ? "rtl" : "ltr");
 
-    // Express font-size as a zoom multiplier so ALL elements scale, including
-    // those with hardcoded px values. Default font size (13) gives a multiplier
-    // of 1 — backward-compatible with stored zoom preferences.
-    const effectiveZoom = s.zoom * (s.fontSize / 13);
+    // Native webview zoom is applied from App.tsx. Keeping CSS zoom off avoids
+    // WebKitGTK scroll invalidation bugs on transparent Tauri windows.
+    const effectiveZoom = displayZoomFactor(s);
     const materialOpacity = clampNumber(s.materialOpacity, 0, 100, 100);
     root.style.setProperty("--base-font-size", `${s.fontSize}px`);
-    root.style.setProperty("--app-zoom", String(effectiveZoom));
+    root.style.removeProperty("--app-zoom");
     root.style.setProperty("--material-opacity", String(materialOpacity / 100));
     root.style.setProperty("--material-opacity-percent", `${materialOpacity}%`);
     root.style.setProperty("--material-density", "0");
@@ -191,7 +194,8 @@ export function applyDisplay(s: DisplaySettings) {
         "[display] applied — " +
             `font: ${s.fontFamily || "(system)"} → css: ${fontCss} ` +
             `| computed font-family: ${computed.getPropertyValue("--app-font").trim()} ` +
-            `| size: ${s.fontSize}px, zoom: ${s.zoom} → effective: ${effectiveZoom.toFixed(3)} ` +
+            `| size: ${s.fontSize}px, zoom: ${s.zoom} ` +
+            `→ effective: ${effectiveZoom.toFixed(3)} ` +
             `| lang: ${s.lang} (rtl=${isRTL(s.lang)}) ` +
             `| accent: ${s.accentColor}`,
     );

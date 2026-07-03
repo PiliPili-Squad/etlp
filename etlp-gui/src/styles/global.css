@@ -66,7 +66,6 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    zoom: var(--app-zoom, 1);
 }
 
 /* ── Dark theme (system preference) ────────────────────────────────── */
@@ -192,6 +191,7 @@ body.platform-windows {
 }
 body.platform-linux {
     font-family: var(--app-font, "Roboto"), "Roboto", "Noto Sans", system-ui, sans-serif;
+    background: var(--material-surface);
 }
 
 .app {
@@ -257,6 +257,17 @@ body.platform-windows .app {
     clip-path: none;
     border: none;
     box-shadow: none;
+}
+
+body.platform-linux .app {
+    border-radius: 0;
+    clip-path: none;
+    background: var(--material-surface);
+}
+
+body.platform-linux .app::before,
+body.platform-linux .app::after {
+    display: none;
 }
 
 /* ── Titlebar ────────────────────────────────────────────────────────── */
@@ -504,6 +515,12 @@ body.platform-linux .app.brand-hidden .sidebar {
     padding: 24px 26px 36px;
     min-width: 0;
     background: transparent;
+}
+
+body.platform-linux .sidebar,
+body.platform-linux .content {
+    backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 body.platform-windows .content {
