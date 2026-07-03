@@ -100,7 +100,6 @@ fn apply_custom_icon(
 ) {
     let icon = tauri::image::Image::new_owned(rgba, width, height);
 
-    #[cfg(target_os = "windows")]
     if let Some(tray) = app.tray_by_id(crate::TRAY_ICON_ID) {
         let _ = tray.set_icon_with_as_template(Some(icon.clone()), false);
     }
@@ -958,7 +957,7 @@ pub fn get_custom_app_icon() -> Result<Option<CustomIconInfo>, String> {
 ///
 /// The bundled app executable icon cannot be rewritten reliably at runtime on
 /// every platform, so this updates the in-app branding, main window icon, and
-/// Windows tray icon immediately while persisting the PNG for the next launch.
+/// tray/menu bar icon immediately while persisting the PNG for the next launch.
 #[tauri::command]
 pub async fn pick_custom_app_icon(
     app: tauri::AppHandle,
@@ -993,15 +992,12 @@ pub fn reset_custom_app_icon(app: tauri::AppHandle) -> Result<(), String> {
     crate::elevated_fs::remove_file_if_exists(&path)
         .map_err(|e| format!("ICON_REMOVE:{e}"))?;
 
-    #[cfg(target_os = "windows")]
-    {
-        let (bytes, is_template) = crate::tray_icon_asset();
-        let (rgba, width, height) = crate::decode_png_icon(bytes)
-            .map_err(|e| format!("ICON_INVALID:{e}"))?;
-        let icon = tauri::image::Image::new_owned(rgba, width, height);
-        if let Some(tray) = app.tray_by_id(crate::TRAY_ICON_ID) {
-            let _ = tray.set_icon_with_as_template(Some(icon), is_template);
-        }
+    let (bytes, is_template) = crate::tray_icon_asset();
+    let (rgba, width, height) = crate::decode_png_icon(bytes)
+        .map_err(|e| format!("ICON_INVALID:{e}"))?;
+    let icon = tauri::image::Image::new_owned(rgba, width, height);
+    if let Some(tray) = app.tray_by_id(crate::TRAY_ICON_ID) {
+        let _ = tray.set_icon_with_as_template(Some(icon), is_template);
     }
 
     let (rgba, width, height) =

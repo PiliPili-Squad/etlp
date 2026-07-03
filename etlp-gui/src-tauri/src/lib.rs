@@ -638,10 +638,7 @@ pub fn run() {
     eprintln!("[etlp] log    file: {}", log_file.display());
 
     // Decode the tray PNG to raw RGBA at startup. A decode failure must not
-    // crash the app — the tray simply launches without a custom icon. macOS
-    // and Linux keep their bundled tray/menu-bar icons because PNG brand icons
-    // do not render reliably there.
-    #[cfg(target_os = "windows")]
+    // crash the app — the tray simply falls back to the bundled platform icon.
     let custom_icon = custom_app_icon_path()
         .and_then(|path| std::fs::read(&path).ok())
         .and_then(|bytes| {
@@ -651,8 +648,6 @@ pub fn run() {
                 })
                 .ok()
         });
-    #[cfg(not(target_os = "windows"))]
-    let custom_icon = None;
 
     let tray_is_template = custom_icon.is_none() && {
         let (_, is_template) = tray_icon_asset();
