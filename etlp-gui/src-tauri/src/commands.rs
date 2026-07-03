@@ -2614,6 +2614,13 @@ fn shell_execute_runas(
 }
 
 #[cfg(target_os = "windows")]
+fn should_retry_with_elevation(error: &std::io::Error) -> bool {
+    const ERROR_ELEVATION_REQUIRED: i32 = 740;
+    error.kind() == std::io::ErrorKind::PermissionDenied
+        || error.raw_os_error() == Some(ERROR_ELEVATION_REQUIRED)
+}
+
+#[cfg(target_os = "windows")]
 fn apply_installer_inner(
     app: &tauri::AppHandle,
     dest: &std::path::Path,
@@ -2656,9 +2663,10 @@ fn launch_portable_updater(
 
     match std::process::Command::new(updater_exe).args(&args).spawn() {
         Ok(_) => Ok(()),
-        Err(e) if matches!(e.kind(), std::io::ErrorKind::PermissionDenied) => {
-            shell_execute_runas(updater_exe, &args)
-        }
+        Err(e) if should_retry_with_elevation(&e) => shell_execute_runas(
+            updater_exe,
+            &args,
+        ),
         Err(e) => Err(format!("launch updater.exe: {e}")),
     }
 }
