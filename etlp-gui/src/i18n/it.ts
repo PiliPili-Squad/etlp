@@ -408,9 +408,9 @@ export const it: typeof zhCN = {
     sys_app_icon_too_small:
         "La risoluzione dell'immagine è troppo bassa ({size}); serve almeno 512x512",
     sys_app_icon_invalid: "Scegli un'immagine PNG valida",
-    sys_material_opacity: "Opacità materiale",
+    sys_material_opacity: "Intensità del materiale",
     sys_material_opacity_desc:
-        "50% mantiene l'aspetto predefinito; a sinistra più trasparente, a destra più denso",
+        "0% si fonde con la base della finestra; 100% mostra il materiale del pannello più solido",
     sys_live_backdrop: "Sfocatura sfondo in tempo reale",
     sys_live_backdrop_desc:
         "Disattivata usa un materiale statico per mantenere stabile lo scorrimento; attivata sfoca davvero il contenuto dietro la finestra e richiede più prestazioni",

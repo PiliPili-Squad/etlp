@@ -409,9 +409,9 @@ export const pl: typeof zhCN = {
     sys_app_icon_too_small:
         "Rozdzielczość obrazu jest za niska ({size}); wymagane co najmniej 512x512",
     sys_app_icon_invalid: "Wybierz prawidłowy obraz PNG",
-    sys_material_opacity: "Nieprzezroczystość materiału",
+    sys_material_opacity: "Intensywność materiału",
     sys_material_opacity_desc:
-        "50% zachowuje domyślny wygląd; w lewo bardziej przezroczysty, w prawo gęstszy materiał",
+        "0% stapia się z bazą okna, 100% pokazuje najbardziej zwartą powierzchnię panelu",
     sys_live_backdrop: "Rozmycie tła na żywo",
     sys_live_backdrop_desc:
         "Po wyłączeniu używa statycznego materiału, aby przewijanie było stabilne; po włączeniu naprawdę rozmywa treść za oknem i wymaga większej wydajności",

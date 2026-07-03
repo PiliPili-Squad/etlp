@@ -387,8 +387,8 @@ export const zhCN = {
     sys_app_icon_reset_done: "已恢复默认图标",
     sys_app_icon_too_small: "图片分辨率过低（{size}），至少需要 512x512",
     sys_app_icon_invalid: "请选择有效的 PNG 图片",
-    sys_material_opacity: "材质不透明度",
-    sys_material_opacity_desc: "0% 为完全透明，100% 为完全不透明",
+    sys_material_opacity: "材质强度",
+    sys_material_opacity_desc: "0% 融入窗口底色，100% 显示最实的面板材质",
     sys_live_backdrop: "实时背景模糊",
     sys_live_backdrop_desc:
         "关闭时使用静态材质以保持滚动稳定；开启后真实模糊窗口下方内容，但需要更高性能",

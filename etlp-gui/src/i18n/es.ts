@@ -412,9 +412,9 @@ export const es: typeof zhCN = {
     sys_app_icon_too_small:
         "La resolución de la imagen es demasiado baja ({size}); se requiere al menos 512x512",
     sys_app_icon_invalid: "Elige una imagen PNG válida",
-    sys_material_opacity: "Opacidad del material",
+    sys_material_opacity: "Intensidad del material",
     sys_material_opacity_desc:
-        "50% mantiene el aspecto predeterminado; a la izquierda es más transparente y a la derecha más denso",
+        "0% se integra con la base de la ventana; 100% muestra el material de panel más sólido",
     sys_live_backdrop: "Desenfoque de fondo en tiempo real",
     sys_live_backdrop_desc:
         "Desactivado usa un material estático para que el desplazamiento sea estable; activado desenfoca realmente lo que hay detrás de la ventana y requiere más rendimiento",

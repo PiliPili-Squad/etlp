@@ -416,9 +416,9 @@ export const fr: typeof zhCN = {
     sys_app_icon_too_small:
         "La résolution de l'image est trop faible ({size}) ; 512x512 minimum requis",
     sys_app_icon_invalid: "Choisissez une image PNG valide",
-    sys_material_opacity: "Opacité du matériau",
+    sys_material_opacity: "Intensité du matériau",
     sys_material_opacity_desc:
-        "50% conserve l'apparence par défaut ; vers la gauche c'est plus transparent, vers la droite plus dense",
+        "0% se fond dans la base de la fenêtre ; 100% affiche le matériau de panneau le plus dense",
     sys_live_backdrop: "Flou d'arrière-plan en temps réel",
     sys_live_backdrop_desc:
         "Désactivé, utilise un matériau statique pour garder un défilement stable ; activé, floute réellement le contenu derrière la fenêtre et demande plus de performances",

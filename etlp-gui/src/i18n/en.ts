@@ -418,8 +418,9 @@ export const en: typeof zhCN = {
     sys_app_icon_too_small:
         "Image resolution is too low ({size}); at least 512x512 is required",
     sys_app_icon_invalid: "Choose a valid PNG image",
-    sys_material_opacity: "Material Opacity",
-    sys_material_opacity_desc: "0% is fully transparent and 100% is fully opaque",
+    sys_material_opacity: "Material Strength",
+    sys_material_opacity_desc:
+        "0% blends into the window base; 100% shows the most solid panel material",
     sys_live_backdrop: "Live Background Blur",
     sys_live_backdrop_desc:
         "Off uses static material for stable scrolling; on truly blurs content beneath the window and requires more performance",

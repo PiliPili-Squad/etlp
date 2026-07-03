@@ -412,9 +412,9 @@ export const de: typeof zhCN = {
     sys_app_icon_too_small:
         "Bildauflösung ist zu niedrig ({size}); mindestens 512x512 erforderlich",
     sys_app_icon_invalid: "Bitte ein gültiges PNG-Bild wählen",
-    sys_material_opacity: "Materialdeckkraft",
+    sys_material_opacity: "Materialstärke",
     sys_material_opacity_desc:
-        "50% behält die Standardoptik; nach links wird es transparenter, nach rechts dichter",
+        "0% verschmilzt mit der Fenstergrundfarbe, 100% zeigt das kräftigste Panelmaterial",
     sys_live_backdrop: "Live-Hintergrundunschärfe",
     sys_live_backdrop_desc:
         "Aus verwendet ein statisches Material für stabiles Scrollen; ein verwischt den Inhalt hinter dem Fenster wirklich und benötigt mehr Leistung",

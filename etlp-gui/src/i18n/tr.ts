@@ -399,9 +399,9 @@ export const tr: typeof zhCN = {
     sys_app_icon_too_small:
         "Görsel çözünürlüğü çok düşük ({size}); en az 512x512 gerekiyor",
     sys_app_icon_invalid: "Geçerli bir PNG görseli seçin",
-    sys_material_opacity: "Malzeme Opaklığı",
+    sys_material_opacity: "Malzeme Yoğunluğu",
     sys_material_opacity_desc:
-        "50% varsayılan görünümü korur; sola daha saydam, sağa daha yoğun yapar",
+        "0% pencere tabanına karışır; 100% en dolu panel malzemesini gösterir",
     sys_live_backdrop: "Canlı Arka Plan Bulanıklığı",
     sys_live_backdrop_desc:
         "Kapalıyken kaydırmayı kararlı tutmak için statik malzeme kullanılır; açıkken pencerenin arkasındaki içerik gerçekten bulanıklaştırılır ve daha yüksek performans gerekir",

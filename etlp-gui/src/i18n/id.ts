@@ -403,9 +403,9 @@ export const id: typeof zhCN = {
     sys_app_icon_too_small:
         "Resolusi gambar terlalu rendah ({size}); minimal 512x512 diperlukan",
     sys_app_icon_invalid: "Pilih gambar PNG yang valid",
-    sys_material_opacity: "Opasitas Material",
+    sys_material_opacity: "Kekuatan Material",
     sys_material_opacity_desc:
-        "50% mempertahankan tampilan default; geser ke kiri agar lebih transparan atau ke kanan agar lebih padat",
+        "0% menyatu dengan dasar jendela; 100% menampilkan material panel paling solid",
     sys_live_backdrop: "Blur Latar Langsung",
     sys_live_backdrop_desc:
         "Saat mati, aplikasi memakai material statis agar scroll tetap stabil; saat aktif, konten di balik jendela benar-benar diblur dan membutuhkan performa lebih tinggi",

@@ -404,9 +404,9 @@ export const sk: typeof zhCN = {
     sys_app_icon_too_small:
         "Rozlíšenie obrázka je príliš nízke ({size}); vyžaduje sa aspoň 512x512",
     sys_app_icon_invalid: "Vyberte platný PNG obrázok",
-    sys_material_opacity: "Nepriehľadnosť materiálu",
+    sys_material_opacity: "Intenzita materiálu",
     sys_material_opacity_desc:
-        "50% zachová predvolený vzhľad; doľava je priehľadnejší, doprava hustejší",
+        "0% splýva so základom okna, 100% zobrazí najhutnejší materiál panela",
     sys_live_backdrop: "Živé rozmazanie pozadia",
     sys_live_backdrop_desc:
         "Vypnuté používa statický materiál, aby bolo posúvanie stabilné; zapnuté skutočne rozmazáva obsah za oknom a vyžaduje vyšší výkon",

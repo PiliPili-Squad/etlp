@@ -382,9 +382,9 @@ export const he: typeof zhCN = {
     sys_app_icon_reset_done: "סמל ברירת המחדל שוחזר",
     sys_app_icon_too_small: "רזולוציית התמונה נמוכה מדי ({size}); נדרש לפחות 512x512",
     sys_app_icon_invalid: "בחר תמונת PNG תקינה",
-    sys_material_opacity: "אטימות חומר",
+    sys_material_opacity: "עוצמת החומר",
     sys_material_opacity_desc:
-        "50% שומר על מראה ברירת המחדל; שמאלה לשקיפות גבוהה יותר, ימינה לחומר צפוף יותר",
+        "0% משתלב עם בסיס החלון, 100% מציג את חומר הלוח המוצק ביותר",
     sys_live_backdrop: "טשטוש רקע בזמן אמת",
     sys_live_backdrop_desc:
         "כשהאפשרות כבויה נעשה שימוש בחומר סטטי לשמירה על גלילה יציבה; כשהיא פעילה התוכן שמאחורי החלון מטושטש באמת ונדרש ביצועים גבוהים יותר",

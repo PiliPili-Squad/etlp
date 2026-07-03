@@ -390,9 +390,9 @@ export const ja: typeof zhCN = {
     sys_app_icon_reset_done: "既定のアイコンに戻しました",
     sys_app_icon_too_small: "画像の解像度が低すぎます（{size}）。512x512 以上が必要です",
     sys_app_icon_invalid: "有効な PNG 画像を選択してください",
-    sys_material_opacity: "マテリアル不透明度",
+    sys_material_opacity: "マテリアル強度",
     sys_material_opacity_desc:
-        "50% が既定の見た目です。左に動かすとより透明に、右に動かすとより濃くなります",
+        "0% はウィンドウの基調色になじみ、100% は最も濃いパネル素材を表示します",
     sys_live_backdrop: "リアルタイム背景ぼかし",
     sys_live_backdrop_desc:
         "オフのときは静的なマテリアルでスクロールを安定させます。オンにするとウィンドウ背後の内容を実際にぼかすため、より高い性能が必要です",

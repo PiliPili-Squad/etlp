@@ -390,9 +390,9 @@ export const ko: typeof zhCN = {
     sys_app_icon_too_small:
         "이미지 해상도가 너무 낮습니다({size}). 최소 512x512가 필요합니다",
     sys_app_icon_invalid: "유효한 PNG 이미지를 선택하세요",
-    sys_material_opacity: "재질 불투명도",
+    sys_material_opacity: "재질 강도",
     sys_material_opacity_desc:
-        "50%는 기본 느낌을 유지합니다. 왼쪽은 더 투명하게, 오른쪽은 더 두껍게 표시합니다",
+        "0%는 창 기본색과 어우러지고, 100%는 가장 단단한 패널 재질을 표시합니다",
     sys_live_backdrop: "실시간 배경 흐림",
     sys_live_backdrop_desc:
         "끄면 안정적인 스크롤을 위해 정적 재질을 사용합니다. 켜면 창 뒤의 내용을 실제로 흐리게 처리하므로 더 높은 성능이 필요합니다",
