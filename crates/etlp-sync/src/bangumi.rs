@@ -2345,11 +2345,26 @@ pub async fn sync_episodes(
             api.add_collection_subject(subject_id, CollectionState::Watching)
                 .await?;
         }
-        Some(ref c) if c.get("type").and_then(|t| t.as_u64()) == Some(2) => {
-            info!("bangumi: subject {subject_id} already marked Watched, skip");
-            return Ok(Vec::new());
-        }
-        Some(_) => {}
+        Some(ref c) => match c.get("type").and_then(|t| t.as_u64()) {
+            Some(2) => {
+                info!(
+                    "bangumi: subject {subject_id} already marked Watched, skip"
+                );
+                return Ok(Vec::new());
+            }
+            Some(1) | Some(4) => {
+                info!(
+                    "bangumi: subject {subject_id} marked as Wish or OnHold, \
+                     upgrading to Watching"
+                );
+                api.add_collection_subject(
+                    subject_id,
+                    CollectionState::Watching,
+                )
+                .await?;
+            }
+            _ => {}
+        },
     }
 
     // Log which episode sort numbers the user has already watched on BGM.
@@ -2468,12 +2483,28 @@ pub async fn mark_backfill_in_subject(
     // Ensure the subject is collected. A subject already marked Watched (2) is
     // left as-is: its episodes are all watched, so the matching below simply
     // consumes the relevant pending entries without re-marking anything.
-    if api.get_subject_collection(subject_id).await?.is_none() {
-        info!(
-            "bangumi: subject {subject_id} not collected, adding as Watching"
-        );
-        api.add_collection_subject(subject_id, CollectionState::Watching)
-            .await?;
+    match api.get_subject_collection(subject_id).await? {
+        None => {
+            info!(
+                "bangumi: subject {subject_id} not collected, adding as Watching"
+            );
+            api.add_collection_subject(subject_id, CollectionState::Watching)
+                .await?;
+        }
+        Some(ref c) => match c.get("type").and_then(|t| t.as_u64()) {
+            Some(1) | Some(4) => {
+                info!(
+                    "bangumi: subject {subject_id} marked as Wish or OnHold, \
+                     upgrading to Watching"
+                );
+                api.add_collection_subject(
+                    subject_id,
+                    CollectionState::Watching,
+                )
+                .await?;
+            }
+            _ => {}
+        },
     }
 
     let ep_list = api.get_episodes(subject_id).await?;
