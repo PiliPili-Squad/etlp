@@ -124,6 +124,10 @@ pub struct PlayerManager {
     /// exits so continuously-played later episodes are written back and synced,
     /// not only the episode the user opened.
     playlist_stops: Arc<Mutex<HashMap<String, i64>>>,
+    /// Tracks episodes that reached the 80% completion threshold during any visit
+    /// within the playlist session. Used to prevent Trakt from skipping episodes
+    /// if the user later jumps back to them and leaves their progress at 0%.
+    completed_episodes: Arc<Mutex<HashSet<String>>>,
     /// Set to `true` by the realtime feedback loop when it successfully sends
     /// the initial `Sessions/Playing` (Start) event. `write_progress` reads
     /// this to avoid sending a redundant Start when the loop already ran.
@@ -143,6 +147,7 @@ impl PlayerManager {
             stop_times: HashMap::new(),
             total_secs: HashMap::new(),
             playlist_stops: Arc::new(Mutex::new(HashMap::new())),
+            completed_episodes: Arc::new(Mutex::new(HashSet::new())),
             realtime_started: Arc::new(AtomicBool::new(false)),
             disable_progress_report: false,
         }
@@ -178,6 +183,11 @@ impl PlayerManager {
             .unwrap_or_default();
 
         let have_playlist_data = !captured.is_empty();
+        let historically_completed = self
+            .completed_episodes
+            .lock()
+            .map(|m| m.clone())
+            .unwrap_or_default();
         for (title, pos) in captured {
             let is_primary = title == self.data.media_title;
             let completed = self
@@ -185,7 +195,8 @@ impl PlayerManager {
                 .get(&title)
                 .map(|ep| ep.is_complete_at(pos))
                 .unwrap_or(false);
-            if is_primary || completed {
+            let in_whitelist = historically_completed.contains(&title);
+            if is_primary || completed || in_whitelist {
                 self.stop_times.insert(title, pos);
             }
         }
@@ -281,10 +292,16 @@ impl PlayerManager {
                 // Fall back to primary data for single-episode playback.
                 let ep = self.playlist.get(key).unwrap_or(&self.data);
                 let progress = ep.progress_percent(stop_sec);
+                let is_historical_completed = self
+                    .completed_episodes
+                    .lock()
+                    .map(|m| m.contains(key))
+                    .unwrap_or(false);
                 SyncEntry {
                     stop_sec,
                     progress,
-                    completed: PlaybackData::is_complete_percent(progress),
+                    completed: PlaybackData::is_complete_percent(progress)
+                        || is_historical_completed,
                     data: ep,
                 }
             })
@@ -342,6 +359,8 @@ impl PlayerManager {
                 playlist.clone(),
                 cancel_tx,
                 realtime_started,
+                self.playlist_stops.clone(),
+                self.completed_episodes.clone(),
             ));
         }
         tokio::spawn(force_playlist_title_loop(client.clone()));
@@ -509,6 +528,8 @@ pub async fn realtime_playing_feedback_loop(
     playlist: HashMap<String, PlaybackData>,
     cancel_tx: Option<UnboundedSender<String>>,
     realtime_started: Arc<AtomicBool>,
+    stops: Arc<Mutex<HashMap<String, i64>>>,
+    completed_eps: Arc<Mutex<HashSet<String>>>,
 ) {
     // STRM sentinel (total_sec == 86400) and Plex are not supported.
     if data.runtime_missing() || data.server == etlp_core::Server::Plex {
@@ -575,10 +596,24 @@ pub async fn realtime_playing_feedback_loop(
                     let id = dl_task_id(&prev_ep).to_owned();
                     let _ = tx.send(id);
                 }
+                let mut final_req_sec = req_sec;
+                if let Some(prev_title) = &last_key {
+                    if let Ok(stops_map) = stops.lock() {
+                        if let Some(&saved_pos) = stops_map.get(prev_title) {
+                            final_req_sec = saved_pos;
+                        }
+                    }
+                    let progress = prev_ep.progress_percent(final_req_sec);
+                    if PlaybackData::is_complete_percent(progress) {
+                        if let Ok(mut completed) = completed_eps.lock() {
+                            completed.insert(prev_title.clone());
+                        }
+                    }
+                }
                 let _ = realtime_progress(
                     &http,
                     &prev_ep,
-                    req_sec,
+                    final_req_sec,
                     PlaybackEvent::End,
                 )
                 .await;
