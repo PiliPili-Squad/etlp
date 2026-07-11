@@ -210,9 +210,6 @@ impl PlayerManager {
 
     /// Write stop progress back to the originating media server for all
     /// episodes whose stop time was collected.
-    ///
-    /// Skips entries whose `stop_sec` is too close to `start_sec` (< 20 s),
-    /// preventing spurious "watched" marks from accidental play-and-quit.
     pub async fn write_progress(&self, http: &HttpClient) {
         for (key, &stop_sec) in &self.stop_times {
             let ep = match self.playlist.get(key) {
@@ -228,16 +225,6 @@ impl PlayerManager {
                     }
                 }
             };
-
-            let start_sec = ep.start_sec;
-            if (stop_sec - start_sec).unsigned_abs() < 20 {
-                info!(
-                    "skip progress write for {:?}: stop({stop_sec}) too close \
-                     to start({start_sec})",
-                    ep.basename,
-                );
-                continue;
-            }
 
             if self.disable_progress_report {
                 if ep.is_complete_at(stop_sec) {
@@ -1083,31 +1070,5 @@ mod tests {
         let e = entries.first().unwrap();
         assert!(!e.completed);
         assert_eq!(e.progress, 0.0);
-    }
-
-    // ── write_progress skip logic ─────────────────────────────────────────────
-
-    #[test]
-    fn skip_when_stop_too_close_to_start() {
-        let data = dummy_data("Anime S01E01", 500);
-        let mut mgr = make_mgr(data);
-        // stop_sec=510, start_sec=500 → diff=10 < 20 → should skip
-        mgr.stop_times.insert("Anime S01E01".into(), 510);
-        let stop_sec =
-            *mgr.stop_times.get("Anime S01E01").expect("entry present");
-        let ep = &mgr.data;
-        let should_skip = (stop_sec - ep.start_sec).unsigned_abs() < 20;
-        assert!(should_skip, "expected skip when diff < 20s");
-    }
-
-    #[test]
-    fn do_not_skip_when_stop_far_from_start() {
-        let data = dummy_data("Anime S01E01", 0);
-        let mut mgr = make_mgr(data);
-        mgr.stop_times.insert("Anime S01E01".into(), 1800);
-        let stop_sec = *mgr.stop_times.get("Anime S01E01").expect("entry");
-        let ep = &mgr.data;
-        let should_skip = (stop_sec - ep.start_sec).unsigned_abs() < 20;
-        assert!(!should_skip, "should not skip when diff >= 20s");
     }
 }
