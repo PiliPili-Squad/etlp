@@ -56,11 +56,17 @@ async fn emby_realtime(
         ("X-Emby-Client", DEVICE_NAME),
         ("X-Emby-Device-Name", DEVICE_NAME),
     ];
+    let event_name = match event {
+        PlaybackEvent::Start => "playing",
+        PlaybackEvent::Playing => "timeupdate",
+        PlaybackEvent::End => "stopped",
+    };
     let body = json!({
         "PositionTicks": ticks,
         "ItemId": data.item_id,
         "PlaySessionId": data.play_session_id,
         "IsPaused": false,
+        "EventName": event_name,
     });
     let path = match event {
         PlaybackEvent::Start => "Sessions/Playing",
@@ -80,11 +86,17 @@ async fn jellyfin_realtime(
 ) -> Result<()> {
     let ticks = pos_sec * EMBY_TICKS_PER_SEC;
     let base = format!("{}://{}", data.scheme, data.netloc);
+    let event_name = match event {
+        PlaybackEvent::Start => "playing",
+        PlaybackEvent::Playing => "timeupdate",
+        PlaybackEvent::End => "stopped",
+    };
     let body = json!({
         "PositionTicks": ticks,
         "ItemId": data.item_id,
         "PlaySessionId": data.play_session_id,
         "IsPaused": false,
+        "EventName": event_name,
     });
     let path = match event {
         PlaybackEvent::Start => "Sessions/Playing",
