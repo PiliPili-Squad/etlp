@@ -258,7 +258,7 @@ mod tests {
 
         let chunk = vec![b'x'; 600 * 1024];
         // Tag each chunk so we can identify which file holds which write.
-        for tag in [b'A', b'B', b'C', b'D', b'E'] {
+        for &tag in b"ABCDE" {
             let mut line = vec![tag];
             line.extend_from_slice(&chunk);
             rf.write(&line).expect("write");
