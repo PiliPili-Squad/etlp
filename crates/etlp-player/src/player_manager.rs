@@ -508,6 +508,8 @@ const PAUSE_TIMEOUT_SECS: u64 = 10 * 60;
 ///   play event.
 ///
 /// Exits when mpv's IPC disconnects. Plex and STRM media are skipped.
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::collapsible_if)]
 pub async fn realtime_playing_feedback_loop(
     data: PlaybackData,
     client: MpvClient,
