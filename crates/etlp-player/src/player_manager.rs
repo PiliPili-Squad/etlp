@@ -1068,6 +1068,7 @@ pub async fn redirect_next_ep_loop(
         playlist.get(k).and_then(|e| e.order).unwrap_or(i64::MAX)
     });
     let mut done: HashSet<String> = HashSet::new();
+    let mut new_loadfile_fmt: Option<bool> = None;
 
     'outer: loop {
         // Poll mpv: exit when IPC disconnects.
@@ -1193,29 +1194,34 @@ pub async fn redirect_next_ep_loop(
                     }
                 };
 
-            // Append the resolved URL. Commas must be escaped in the
-            // option string since they are the option separator; double
-            // quotes are dropped because mpv's option parser does not
-            // strip them and they would appear in the title literally.
-            let escaped_title =
-                next_ep.media_title.replace('"', "").replace(',', "\\,");
-            let title_opts = format!(
-                "force-media-title={escaped_title},\
-                 osd-playing-msg={escaped_title}"
-            );
+            // Append the resolved URL with per-file title options passed as a
+            // JSON object (handling mpv >= 0.38's `index` parameter via
+            // `command-list` detection).
+            let new_fmt = match new_loadfile_fmt {
+                Some(v) => v,
+                None => {
+                    let v =
+                        crate::mpv::detect_new_loadfile_format_client(&client)
+                            .await;
+                    new_loadfile_fmt = Some(v);
+                    v
+                }
+            };
+            let opts = crate::mpv::LoadOptions {
+                media_title: Some(next_ep.media_title.clone()),
+                ..crate::mpv::LoadOptions::default()
+            };
             let total = entries.len() as i64;
             let ni = next_mpv_idx as i64;
-            if client
-                .command(
-                    "loadfile",
-                    &[
-                        serde_json::json!(ne_re_url),
-                        serde_json::json!("append"),
-                        serde_json::json!(title_opts),
-                    ],
-                )
-                .await
-                .is_err()
+            if crate::mpv::loadfile_client(
+                &client,
+                &ne_re_url,
+                crate::mpv::LoadMode::Append,
+                &opts,
+                new_fmt,
+            )
+            .await
+            .is_err()
             {
                 break 'outer;
             }

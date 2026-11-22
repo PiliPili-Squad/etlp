@@ -220,6 +220,41 @@ impl LoadOptions {
         }
         parts.join(",")
     }
+
+    /// Render as a JSON value for the `options` argument of mpv's IPC
+    /// `loadfile` command.
+    ///
+    /// Returns a JSON object (`{"force-media-title": ..., ...}`) so titles
+    /// containing commas or quotes are passed verbatim without comma-splitting
+    /// or quote-escaping issues. Falls back to the legacy comma-separated
+    /// string only when `sub_file_prev` is set alongside `sub_file`, because
+    /// that rotation emits duplicate `sub-files-append` keys which a JSON
+    /// object cannot represent.
+    pub fn to_ipc_value(&self) -> Option<Value> {
+        if self.sub_file.is_some() && self.sub_file_prev.is_some() {
+            let s = self.build();
+            return (!s.is_empty()).then_some(Value::String(s));
+        }
+
+        let mut map = serde_json::Map::new();
+        if let Some(t) = &self.media_title {
+            map.insert("force-media-title".into(), Value::String(t.clone()));
+            map.insert("osd-playing-msg".into(), Value::String(t.clone()));
+        }
+        if let Some(s) = self.start_sec {
+            map.insert("start".into(), Value::String(s.to_string()));
+        }
+        if let Some(f) = &self.sub_file {
+            map.insert("sub-file".into(), Value::String(f.clone()));
+        }
+        if let Some(i) = self.sub_inner_index {
+            map.insert("sid".into(), Value::String(i.to_string()));
+        }
+        if let Some(c) = &self.chapters_file {
+            map.insert("chapters-file".into(), Value::String(c.clone()));
+        }
+        (!map.is_empty()).then_some(Value::Object(map))
+    }
 }
 
 // ── LaunchArgs ────────────────────────────────────────────────────────────────
@@ -674,32 +709,9 @@ impl MpvHandle {
     /// Detect whether mpv supports the new `loadfile` command format (≥ 0.38).
     ///
     /// The new format includes an `index` argument between the mode and the
-    /// options string.  Cache the result and pass it to [`Self::loadfile`].
+    /// options argument.  Cache the result and pass it to [`Self::loadfile`].
     pub async fn detect_new_loadfile_format(&self) -> bool {
-        let result = self
-            .client
-            .command("get_property", &[json!("command-list")])
-            .await;
-        match result {
-            Ok(Some(val)) => {
-                let cmds = match val.as_array() {
-                    Some(a) => a,
-                    None => return false,
-                };
-                cmds.iter().any(|c| {
-                    c.get("name").and_then(Value::as_str) == Some("loadfile")
-                        && c.get("args").and_then(Value::as_array).is_some_and(
-                            |args| {
-                                args.iter().any(|a| {
-                                    a.get("name").and_then(Value::as_str)
-                                        == Some("index")
-                                })
-                            },
-                        )
-                })
-            }
-            _ => false,
-        }
+        detect_new_loadfile_format_client(&self.client).await
     }
 
     /// Add or replace a file in mpv's playlist.
@@ -714,16 +726,7 @@ impl MpvHandle {
         opts: &LoadOptions,
         new_format: bool,
     ) -> Result<(), PlayerError> {
-        let opts_str = opts.build();
-        let mut args: Vec<Value> = vec![json!(path), json!(mode.as_str())];
-        if new_format {
-            args.push(json!(mode.index()));
-        }
-        if !opts_str.is_empty() {
-            args.push(json!(opts_str));
-        }
-        self.client.command("loadfile", &args).await?;
-        Ok(())
+        loadfile_client(&self.client, path, mode, opts, new_format).await
     }
 
     /// Jump to a playlist index.
@@ -806,6 +809,58 @@ impl MpvHandle {
         self.client.command("script-message", &json_args).await?;
         Ok(())
     }
+}
+
+/// Detect whether mpv supports the new `loadfile` command format (≥ 0.38)
+/// using a bare [`MpvClient`].
+///
+/// The new format includes an `index` argument between `flags` and `options`.
+pub async fn detect_new_loadfile_format_client(client: &MpvClient) -> bool {
+    let result = client
+        .command("get_property", &[json!("command-list")])
+        .await;
+    match result {
+        Ok(Some(val)) => {
+            let cmds = match val.as_array() {
+                Some(a) => a,
+                None => return false,
+            };
+            cmds.iter().any(|c| {
+                c.get("name").and_then(Value::as_str) == Some("loadfile")
+                    && c.get("args").and_then(Value::as_array).is_some_and(
+                        |args| {
+                            args.iter().any(|a| {
+                                a.get("name").and_then(Value::as_str)
+                                    == Some("index")
+                            })
+                        },
+                    )
+            })
+        }
+        _ => false,
+    }
+}
+
+/// Add or replace a file in mpv's playlist using a bare [`MpvClient`].
+///
+/// Passes `options` as a JSON object via [`LoadOptions::to_ipc_value`] so
+/// titles containing commas or quotes are never truncated or mangled.
+pub async fn loadfile_client(
+    client: &MpvClient,
+    path: &str,
+    mode: LoadMode,
+    opts: &LoadOptions,
+    new_format: bool,
+) -> Result<(), PlayerError> {
+    let mut args: Vec<Value> = vec![json!(path), json!(mode.as_str())];
+    if new_format {
+        args.push(json!(mode.index()));
+    }
+    if let Some(opts_val) = opts.to_ipc_value() {
+        args.push(opts_val);
+    }
+    client.command("loadfile", &args).await?;
+    Ok(())
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -1254,7 +1309,7 @@ mod tests {
         .await;
 
         let opts = LoadOptions {
-            media_title: Some("Ep 2".into()),
+            media_title: Some("学生会也有洞！ S1:E3 - A, B".into()),
             start_sec: Some(0.0),
             ..LoadOptions::default()
         };
@@ -1265,6 +1320,7 @@ mod tests {
 
         let req = received.lock().unwrap().clone().expect("received");
         let cmd = req.get("command").and_then(Value::as_array).expect("cmd");
+        assert_eq!(cmd.len(), 5);
         assert_eq!(cmd.first().and_then(Value::as_str), Some("loadfile"));
         assert_eq!(
             cmd.get(1).and_then(Value::as_str),
@@ -1273,9 +1329,17 @@ mod tests {
         assert_eq!(cmd.get(2).and_then(Value::as_str), Some("append"));
         // index = -1
         assert_eq!(cmd.get(3).and_then(Value::as_i64), Some(-1));
-        // options string present as 5th element
-        let opts_str = cmd.get(4).and_then(Value::as_str).expect("opts");
-        assert!(opts_str.contains("force-media-title=\"Ep 2\""));
+        // options JSON object present as 5th element, preserving commas verbatim
+        let opts_obj = cmd.get(4).and_then(Value::as_object).expect("opts obj");
+        assert_eq!(
+            opts_obj.get("force-media-title").and_then(Value::as_str),
+            Some("学生会也有洞！ S1:E3 - A, B")
+        );
+        assert_eq!(
+            opts_obj.get("osd-playing-msg").and_then(Value::as_str),
+            Some("学生会也有洞！ S1:E3 - A, B")
+        );
+        assert_eq!(opts_obj.get("start").and_then(Value::as_str), Some("0"));
     }
 
     #[tokio::test]
@@ -1290,7 +1354,7 @@ mod tests {
         .await;
 
         let opts = LoadOptions {
-            media_title: Some("Ep 3".into()),
+            media_title: Some("Ep 3, \"Special\"".into()),
             ..LoadOptions::default()
         };
         handle
@@ -1300,13 +1364,16 @@ mod tests {
 
         let req = received.lock().unwrap().clone().expect("received");
         let cmd = req.get("command").and_then(Value::as_array).expect("cmd");
-        // Old format: [loadfile, url, mode, options_string]  — 4 elements
+        // Old format: [loadfile, url, mode, options_obj]  — 4 elements
         assert_eq!(cmd.len(), 4);
+        let opts_obj = cmd.get(3).and_then(Value::as_object).expect("opts obj");
         assert_eq!(
-            cmd.get(3)
-                .and_then(Value::as_str)
-                .map(|s| s.contains("force-media-title")),
-            Some(true)
+            opts_obj.get("force-media-title").and_then(Value::as_str),
+            Some("Ep 3, \"Special\"")
+        );
+        assert_eq!(
+            opts_obj.get("osd-playing-msg").and_then(Value::as_str),
+            Some("Ep 3, \"Special\"")
         );
     }
 

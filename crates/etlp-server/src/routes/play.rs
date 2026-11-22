@@ -562,10 +562,8 @@ async fn run_player_chain(
             };
             if !loaded_via_m3u8 {
                 for ep in &after {
-                    let title_escaped =
-                        ep.media_title.replace('"', "").replace(',', "\\,");
                     let opts = LoadOptions {
-                        media_title: Some(title_escaped),
+                        media_title: Some(ep.media_title.clone()),
                         ..LoadOptions::default()
                     };
                     if let Err(e) = h
