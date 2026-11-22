@@ -1068,6 +1068,7 @@ pub async fn redirect_next_ep_loop(
         playlist.get(k).and_then(|e| e.order).unwrap_or(i64::MAX)
     });
     let mut done: HashSet<String> = HashSet::new();
+    let mut resolved_urls: HashMap<String, String> = HashMap::new();
     let mut new_loadfile_fmt: Option<bool> = None;
 
     'outer: loop {
@@ -1145,17 +1146,13 @@ pub async fn redirect_next_ep_loop(
                 };
 
             let cu_url = &ep.stream_url;
-            let cu_re_url = ep.redirect_url.as_deref().unwrap_or("");
+            let cu_re_url = resolved_urls
+                .get(key)
+                .map(String::as_str)
+                .or(ep.redirect_url.as_deref());
 
-            let cur_mpv_idx = entries.iter().position(|e| {
-                let filename =
-                    e.get("filename").and_then(|v| v.as_str()).unwrap_or("");
-                (e.get("playing").and_then(|v| v.as_bool()).unwrap_or(false)
-                    || e.get("current")
-                        .and_then(|v| v.as_bool())
-                        .unwrap_or(false))
-                    && (filename == cu_url || filename == cu_re_url)
-            });
+            let cur_mpv_idx =
+                find_current_mpv_index(&entries, cu_url, cu_re_url);
 
             let Some(cur_mpv_idx) = cur_mpv_idx else {
                 info!(
@@ -1258,6 +1255,7 @@ pub async fn redirect_next_ep_loop(
             }
 
             info!("redirect_next_ep: resolved {next_key:?} → {ne_re_url}");
+            resolved_urls.insert(next_key.clone(), ne_re_url);
             done.insert(key.clone());
         }
 
@@ -1265,6 +1263,25 @@ pub async fn redirect_next_ep_loop(
     }
 
     info!("redirect_next_ep loop exited");
+}
+
+/// Locate the currently playing entry in mpv's `playlist` property by matching
+/// against either the original `stream_url` or a previously resolved
+/// `redirect_url`.
+fn find_current_mpv_index(
+    entries: &[serde_json::Value],
+    stream_url: &str,
+    redirect_url: Option<&str>,
+) -> Option<usize> {
+    entries.iter().position(|e| {
+        let filename = e.get("filename").and_then(|v| v.as_str()).unwrap_or("");
+        let is_active =
+            e.get("playing").and_then(|v| v.as_bool()).unwrap_or(false)
+                || e.get("current").and_then(|v| v.as_bool()).unwrap_or(false);
+        is_active
+            && (filename == stream_url
+                || redirect_url.is_some_and(|re| filename == re))
+    })
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -1811,5 +1828,40 @@ mod tests {
 
         let http = HttpClient::new().unwrap();
         mgr.write_progress(&http).await;
+    }
+
+    #[test]
+    fn find_current_mpv_index_matches_stream_or_resolved_redirect_url() {
+        let entries = vec![
+            serde_json::json!({
+                "filename": "https://emby.example/ep1",
+                "playing": false,
+                "current": false,
+            }),
+            serde_json::json!({
+                "filename": "https://cdn.example/stream?sign=abc",
+                "playing": true,
+                "current": true,
+            }),
+            serde_json::json!({
+                "filename": "https://emby.example/ep3",
+                "playing": false,
+                "current": false,
+            }),
+        ];
+        // Without the resolved redirect URL recorded, ep2 cannot be matched.
+        assert_eq!(
+            find_current_mpv_index(&entries, "https://emby.example/ep2", None),
+            None
+        );
+        // Once the redirect URL from the previous episode is recorded, ep2 matches.
+        assert_eq!(
+            find_current_mpv_index(
+                &entries,
+                "https://emby.example/ep2",
+                Some("https://cdn.example/stream?sign=abc"),
+            ),
+            Some(1)
+        );
     }
 }
