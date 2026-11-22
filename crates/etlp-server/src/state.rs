@@ -90,17 +90,25 @@ impl AppState {
     /// Whether syncing `key` should be skipped because it was already synced
     /// within `window`.
     ///
-    /// On a `false` return (not throttled) the call records `key`'s timestamp,
-    /// so an immediate repeat for the same item is throttled. Stale entries are
-    /// pruned opportunistically to bound the map's size. A poisoned lock fails
-    /// open (returns `false`) so a lock error never blocks legitimate syncs.
+    /// - When `window` is zero, throttling is disabled and this always returns
+    ///   `false` without mutating other keys.
+    /// - When `window` is `Duration::MAX`, `key` is deduplicated for the entire
+    ///   lifetime of this process (until restart).
+    /// - On a `false` return (not throttled) the call records `key`'s timestamp,
+    ///   so an immediate repeat for the same item is throttled. A poisoned lock
+    ///   fails open (returns `false`) so a lock error never blocks legitimate
+    ///   syncs.
     pub fn sync_recently_done(&self, key: &str, window: Duration) -> bool {
+        if window.is_zero() {
+            return false;
+        }
         let now = Instant::now();
         let Ok(mut map) = self.recent_syncs.write() else {
             return false;
         };
-        map.retain(|_, t| now.duration_since(*t) < window);
-        if map.contains_key(key) {
+        if let Some(&t) = map.get(key)
+            && now.duration_since(t) < window
+        {
             return true;
         }
         map.insert(key.to_owned(), now);
@@ -199,5 +207,34 @@ pub mod test_helpers {
             dir.path().to_path_buf(),
         ));
         (state, dir)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::test_helpers::test_state;
+    use std::time::Duration;
+
+    #[test]
+    fn sync_recently_done_handles_max_zero_and_isolated_windows() {
+        let (state, _dir) = test_state();
+
+        // Duration::MAX blocks repeats for the lifetime of the process.
+        assert!(!state.sync_recently_done("trakt:h:1", Duration::MAX));
+        assert!(state.sync_recently_done("trakt:h:1", Duration::MAX));
+
+        // Duration::ZERO never throttles and must not evict other keys.
+        assert!(!state.sync_recently_done("bangumi:h:1", Duration::ZERO));
+        assert!(!state.sync_recently_done("bangumi:h:1", Duration::ZERO));
+        assert!(state.sync_recently_done("trakt:h:1", Duration::MAX));
+
+        // A finite window throttles its own key without evicting others.
+        assert!(
+            !state.sync_recently_done("bangumi:h:2", Duration::from_secs(60))
+        );
+        assert!(
+            state.sync_recently_done("bangumi:h:2", Duration::from_secs(60))
+        );
+        assert!(state.sync_recently_done("trakt:h:1", Duration::MAX));
     }
 }

@@ -330,16 +330,17 @@ pub struct TraktSection {
     pub redirect_uri: String,
     /// Comma-separated host keywords that trigger the Trakt scrobble.
     pub enable_host: String,
-    /// Allow re-marking the same episode/movie on every completion instead of
-    /// throttling repeats. When `true`, the just-watched item bypasses the
-    /// in-process throttle so finishing it again immediately adds another play
-    /// to the Trakt history. Backfill of earlier episodes is always
-    /// de-duplicated against the existing history regardless of this flag.
+    /// Allow re-marking the same episode/movie within a single process run.
+    /// When `false` (default), each item is marked at most once per run in
+    /// memory (restarting the app allows re-watching later). When `true`,
+    /// re-watching records another play subject to `duplicate_throttle_secs`.
+    /// Backfill of earlier episodes is always de-duplicated against the
+    /// existing history regardless of this flag.
     pub allow_duplicate: bool,
-    /// Throttle window, in seconds, for de-duplicating repeated marks of the
-    /// same item while `allow_duplicate` is `false`: finishing the same item
-    /// again within this window is recorded only once. Configs predating this
-    /// field migrate to [`DEFAULT_DUPLICATE_THROTTLE_SECS`].
+    /// Throttle window, in seconds, applied when `allow_duplicate` is `true`:
+    /// finishing the same item again within this window is recorded only once
+    /// (`0` disables throttling). Ignored when `allow_duplicate` is `false`.
+    /// Configs predating this field migrate to [`DEFAULT_DUPLICATE_THROTTLE_SECS`].
     #[serde(default = "default_duplicate_throttle_secs")]
     pub duplicate_throttle_secs: u64,
 }
@@ -485,13 +486,15 @@ pub struct BangumiSection {
     /// is mirrored across all of its Bangumi collections.
     #[serde(default)]
     pub history_follow_media_server: bool,
-    /// Allow re-marking the same episode/movie on every completion instead of
-    /// throttling repeats. When `true`, the just-watched item bypasses the
-    /// throttle window so finishing it again immediately adds another mark.
+    /// Allow re-marking the same episode/movie within a single process run.
+    /// When `false` (default), each item is marked at most once per run in
+    /// memory. When `true`, finishing the same item again re-marks it subject
+    /// to `duplicate_throttle_secs`.
     #[serde(default)]
     pub allow_duplicate: bool,
-    /// Throttle window, in seconds, for de-duplicating repeated marks of the
-    /// same item while `allow_duplicate` is `false`.
+    /// Throttle window, in seconds, applied when `allow_duplicate` is `true`:
+    /// finishing the same item again within this window is marked only once
+    /// (`0` disables throttling). Ignored when `allow_duplicate` is `false`.
     #[serde(default = "default_bangumi_throttle_secs")]
     pub duplicate_throttle_secs: u64,
     /// Source preference for an episode/movie's air date during Bangumi synchronization.

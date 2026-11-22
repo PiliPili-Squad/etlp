@@ -206,7 +206,7 @@ export const en: typeof zhCN = {
         'Preload and download mode are triggered by the browser userscript\'s commands, not toggled here: the script\'s "cache while playing" is preload, and "download only" is download mode; download mode also requires your media server account to permit resource downloads',
     sys_trakt: "Trakt.tv Scrobbling",
     sys_trakt_sync_note:
-        'When playback ends, your viewing is synced to Trakt automatically: reaching the completion threshold (default 90%) or more marks the episode watched, below that it stays unmarked; other episodes of the same season you already finished in your media server are marked too, without duplicating ones already there. Below the threshold your position is remembered so you can pick up later, and the next episode shows under Continue Watching; re-watching the same episode records it again — whether a short time gap is allowed is controlled by the "allow duplicate" switch below.',
+        'When playback ends, your viewing is synced to Trakt automatically: reaching the completion threshold (default 90%) or more marks the episode watched, below that it stays unmarked; other episodes of the same season you already finished in your media server are marked too, without duplicating ones already there. Below the threshold your position is remembered so you can pick up later, and the next episode shows under Continue Watching; whether re-watching the same episode records it again is controlled by the "Allow Duplicate Marking" switch below.',
     sys_trakt_dashboard: "Open Trakt dashboard",
     sys_trakt_enabled: "Enable Trakt Sync",
     sys_trakt_enabled_desc: "When off, no viewing data is synced to Trakt",
@@ -234,10 +234,10 @@ export const en: typeof zhCN = {
     sys_trakt_host_placeholder: "e.g. localhost, 192.168., emby.example.com",
     sys_trakt_dup: "Allow Duplicate Marking",
     sys_trakt_dup_desc:
-        "When on, every completion re-marks the same episode/movie; when off, throttled de-duplication applies: the same item finished again within the throttle window set below is marked only once (back-filled earlier episodes are always de-duplicated regardless)",
+        "When off, the same episode/movie is marked at most once per app run; when on, re-watching records another play subject to the throttle window below (back-filled earlier episodes are always de-duplicated regardless)",
     sys_trakt_dup_throttle: "Duplicate-Mark Throttle (seconds)",
     sys_trakt_dup_throttle_desc:
-        'Effective when "Allow Duplicate Marking" is off: the same item finished again within this many seconds is recorded only once.',
+        'Effective when "Allow Duplicate Marking" is on: the same item finished again within this many seconds is recorded only once (0 = no limit).',
     sys_trakt_dup_throttle_invalid:
         "Throttle must be between 0 and 2,592,000 seconds (30 days); corrected automatically",
     sys_bangumi: "Bangumi.tv Tracking",
@@ -497,10 +497,10 @@ export const en: typeof zhCN = {
     // Bangumi duplicate throttle
     sys_bangumi_dup: "Allow Duplicate Marks",
     sys_bangumi_dup_desc:
-        "When on, every completed watch re-marks the same episode/movie. When off, a throttle window deduplicates: the same item is only marked once within the configured window.",
+        "When off, the same episode/movie is marked at most once per app run. When on, re-watching re-marks the same item subject to the throttle window below.",
     sys_bangumi_dup_throttle: "Duplicate Mark Throttle (seconds)",
     sys_bangumi_dup_throttle_desc:
-        "Active when Allow Duplicate Marks is off: the same item is recorded at most once within this many seconds.",
+        'Active when "Allow Duplicate Marks" is on: the same item is recorded at most once within this many seconds (0 = no limit).',
     sys_bangumi_dup_throttle_invalid:
         "Throttle must be between 0 and 2,592,000 seconds (30 days); corrected automatically",
 

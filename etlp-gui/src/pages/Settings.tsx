@@ -401,6 +401,7 @@ function NumberRow({
     value,
     min,
     max,
+    disabled,
     onCommit,
     onClamp,
 }: {
@@ -409,6 +410,7 @@ function NumberRow({
     value: number;
     min?: number;
     max?: number;
+    disabled?: boolean;
     onCommit: (v: number) => void;
     /** Called when out-of-range input is corrected, so the caller can warn. */
     onClamp?: (bound: "min" | "max") => void;
@@ -420,7 +422,7 @@ function NumberRow({
         setLocal(String(value));
     }
     return (
-        <div className="row">
+        <div className={`row${disabled ? " row-disabled" : ""}`}>
             <div className="row-label">
                 <div>{label}</div>
                 {desc && <div className="row-desc">{desc}</div>}
@@ -432,6 +434,7 @@ function NumberRow({
                     value={local}
                     min={min}
                     max={max}
+                    disabled={disabled}
                     onChange={(e) => setLocal(e.target.value)}
                     onBlur={() => {
                         let n = parseInt(local, 10);
@@ -3756,6 +3759,7 @@ function BangumiSection({
                     value={cfg.bangumi_duplicate_throttle_secs}
                     min={DUP_THROTTLE_MIN}
                     max={DUP_THROTTLE_MAX}
+                    disabled={!cfg.bangumi_allow_duplicate}
                     onCommit={(v) => update("bangumi", "duplicate_throttle_secs", v)}
                     onClamp={() => addToast(t("sys_bangumi_dup_throttle_invalid"), true)}
                 />
@@ -3988,6 +3992,7 @@ function TraktSection({
                     value={cfg.trakt_duplicate_throttle_secs}
                     min={DUP_THROTTLE_MIN}
                     max={DUP_THROTTLE_MAX}
+                    disabled={!cfg.trakt_allow_duplicate}
                     onCommit={(v) => update("trakt", "duplicate_throttle_secs", v)}
                     onClamp={() => addToast(t("sys_trakt_dup_throttle_invalid"), true)}
                 />

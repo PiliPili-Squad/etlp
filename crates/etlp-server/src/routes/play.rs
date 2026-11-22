@@ -1514,8 +1514,10 @@ async fn sync_trakt(state: &SharedState, entries: &[SyncEntry<'_>]) {
 
     // Two batches, both added via `/sync/history` (no scrobble):
     // - `current_items`: the just-watched items, added directly with **no**
-    //   history de-dup, so re-watching an episode records a fresh entry. The
-    //   per-item throttle is the only gate (bypassed by `allow_duplicate`).
+    //   remote history de-dup so re-watching after a restart still records a
+    //   fresh play. Within one process run, `allow_duplicate = false` allows
+    //   each item once (`Duration::MAX`), while `allow_duplicate = true`
+    //   applies the configured throttle window (`0` = no limit).
     // - `backfill_items`: earlier episodes the server already marks played that
     //   Trakt does not yet have, addressed by the show's ids + season/number.
     let mut current_items: Vec<TraktHistoryItem> = Vec::new();
@@ -1537,13 +1539,19 @@ async fn sync_trakt(state: &SharedState, entries: &[SyncEntry<'_>]) {
             continue;
         };
 
-        // Throttle the current item: a re-watch within the window is skipped
-        // unless `allow_duplicate` is on. This gates only the just-watched item,
-        // not the backfill below (which de-dups against the Trakt history).
+        // De-dup / throttle the current item in memory for this process run:
+        // - `allow_duplicate = false`: mark at most once per process run.
+        // - `allow_duplicate = true`: allow re-marks after `trakt_throttle`
+        //   (`0` = no throttle).
+        // This gates only the just-watched item, not the backfill below.
         let key = format!("trakt:{}:{}", data.netloc, data.item_id);
-        let throttled = entry.completed
-            && !allow_duplicate
-            && state.sync_recently_done(&key, trakt_throttle);
+        let window = if allow_duplicate {
+            trakt_throttle
+        } else {
+            std::time::Duration::MAX
+        };
+        let throttled =
+            entry.completed && state.sync_recently_done(&key, window);
 
         // Two APIs, split by the shared completion threshold so each does its
         // own job and a watch is never recorded twice:
@@ -1844,9 +1852,12 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
         // Watched in one batch. No backfill needed — a movie is a single unit.
         if is_movie {
             let key = format!("bangumi:{}:{}", data.netloc, data.item_id);
-            if entry.completed
-                && !bangumi_allow_dup
-                && state.sync_recently_done(&key, bangumi_throttle)
+            let bangumi_window = if bangumi_allow_dup {
+                bangumi_throttle
+            } else {
+                std::time::Duration::MAX
+            };
+            if entry.completed && state.sync_recently_done(&key, bangumi_window)
             {
                 debug!(item = %data.media_title, "bangumi: throttled, skip");
                 continue;
@@ -1962,6 +1973,11 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
                 continue;
             }
             let key = format!("bangumi:{}:{}", d.netloc, d.item_id);
+            let bangumi_window = if bangumi_allow_dup {
+                bangumi_throttle
+            } else {
+                std::time::Duration::MAX
+            };
             if !e.completed {
                 info!(
                     item = %d.media_title,
@@ -1970,9 +1986,7 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
                     "bangumi: progress below completion threshold, \
                      current episode not marked"
                 );
-            } else if !bangumi_allow_dup
-                && state.sync_recently_done(&key, bangumi_throttle)
-            {
+            } else if state.sync_recently_done(&key, bangumi_window) {
                 debug!(item = %d.media_title, "bangumi: throttled, skip");
             } else {
                 season_completed.push((d, idx));
