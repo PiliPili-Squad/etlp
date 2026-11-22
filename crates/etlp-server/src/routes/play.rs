@@ -1979,6 +1979,40 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
             }
         }
 
+        // Choose the highest-index completed episode as the anchor for backfill query.
+        let (anchor_data, anchor_ep_index) = season_completed
+            .iter()
+            .max_by_key(|(_, idx)| *idx)
+            .copied()
+            .unwrap_or((data, ep_index));
+
+        // Collect every episode the media server reports finished (the current
+        // one plus earlier played ones). Earlier played episodes are backfilled
+        // even when the current episode did not reach the completion threshold;
+        // the current episode itself is only included via `season_completed`.
+        let backfill = emby_played_backfill(state, anchor_data).await;
+
+        let mut pending: std::collections::BTreeMap<i64, Option<String>> =
+            backfill
+                .iter()
+                .filter(|p| p.index != anchor_ep_index)
+                .map(|p| (p.index, p.premiere_date.clone()))
+                .collect();
+        for (d, idx) in &season_completed {
+            let _ = pending.insert(*idx, d.premiere_date.clone());
+        }
+
+        // Nothing to mark and "mark as watching" is disabled: skip before
+        // querying series metadata, TMDB, or Bangumi subject search.
+        if pending.is_empty() && !mark_watching {
+            info!(
+                item = %data.media_title,
+                progress = entry.progress as i64,
+                "bangumi: skipped watching mark (disabled by config)"
+            );
+            continue;
+        }
+
         // Fetch series-level provider IDs so user mappings keyed on the
         // TMDB/TVDB *series* id (e.g. `tmdb:79481`) match correctly. Episode
         // items in Emby carry episode-specific provider ids, not the series id.
@@ -2023,34 +2057,7 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
                 (std::collections::BTreeMap::new(), None)
             };
 
-        // Choose the highest-index completed episode as the anchor for backfill query.
-        let (anchor_data, anchor_ep_index) = season_completed
-            .iter()
-            .max_by_key(|(_, idx)| *idx)
-            .copied()
-            .unwrap_or((data, ep_index));
-
-        // Collect every episode the media server reports finished (the current
-        // one plus earlier played ones).
-        let backfill = emby_played_backfill(state, anchor_data).await;
-
-        // If no episode reached completion in this session, leave pending empty
-        // so the branch below only marks the subject as "watching".
-        let mut pending: std::collections::BTreeMap<i64, Option<String>> =
-            if season_completed.is_empty() {
-                std::collections::BTreeMap::new()
-            } else {
-                backfill
-                    .iter()
-                    .filter(|p| p.index != anchor_ep_index)
-                    .map(|p| (p.index, p.premiere_date.clone()))
-                    .collect()
-            };
-        for (d, idx) in &season_completed {
-            let _ = pending.insert(*idx, d.premiere_date.clone());
-        }
-
-        // Nothing to mark: register the subject as "watching" when enabled.
+        // Nothing to mark: register the subject as "watching" (enabled above).
         if pending.is_empty() {
             if let Some(t) = resolve_bangumi_subject(
                 &api,
@@ -2070,14 +2077,6 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
             )
             .await
             {
-                if !mark_watching {
-                    info!(
-                        "bangumi: subject {} skipped watching mark \
-                         (disabled by config, {}%)",
-                        t.subject_id, entry.progress as i64
-                    );
-                    continue;
-                }
                 match api.ensure_collected_watching(t.subject_id).await {
                     Ok(()) => info!(
                         "bangumi: subject {} marked watching ({}%)",
@@ -2126,7 +2125,7 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
             )
             .await
         {
-            let _ = process_backfill_collection(
+            let anchor_consumed = process_backfill_collection(
                 &api,
                 &tmdb,
                 tmdb_series_id,
@@ -2138,6 +2137,25 @@ async fn sync_bangumi(state: &SharedState, entries: &[SyncEntry<'_>]) {
                 &mut touched,
             )
             .await;
+            // If no episode belonged to the anchor collection (e.g. only
+            // earlier split-arc episodes were pending) and the current episode
+            // was not completed, still register the anchor subject as watching
+            // when `mark_watching` is enabled.
+            if anchor_consumed == 0
+                && season_completed.is_empty()
+                && mark_watching
+            {
+                match api.ensure_collected_watching(t.subject_id).await {
+                    Ok(()) => info!(
+                        "bangumi: subject {} marked watching ({}%)",
+                        t.subject_id, entry.progress as i64
+                    ),
+                    Err(e) => warn!(
+                        "bangumi watching mark failed for {}: {e}",
+                        t.subject_id
+                    ),
+                }
+            }
         }
 
         // When not following media server history across split collections,

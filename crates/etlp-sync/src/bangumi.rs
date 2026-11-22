@@ -2776,38 +2776,7 @@ pub async fn mark_backfill_in_subject(
         return Ok(outcome);
     }
 
-    // Ensure the subject is collected. A subject already marked Watched (2) is
-    // left as-is: its episodes are all watched, so the matching below simply
-    // consumes the relevant pending entries without re-marking anything.
-    match api.get_subject_collection(subject_id).await? {
-        None => {
-            info!(
-                "bangumi: subject {subject_id} not collected, adding as Watching"
-            );
-            api.add_collection_subject(subject_id, CollectionState::Watching)
-                .await?;
-        }
-        Some(ref c) => match c.get("type").and_then(|t| t.as_u64()) {
-            Some(1) | Some(4) => {
-                info!(
-                    "bangumi: subject {subject_id} marked as Wish or OnHold, \
-                     upgrading to Watching"
-                );
-                api.add_collection_subject(
-                    subject_id,
-                    CollectionState::Watching,
-                )
-                .await?;
-            }
-            _ => {}
-        },
-    }
-
     let ep_list = api.get_episodes(subject_id).await?;
-    let user_eps = api
-        .get_user_eps_collection(subject_id)
-        .await
-        .unwrap_or_default();
 
     let batch_targets: std::collections::HashSet<u32> = pending
         .iter()
@@ -2818,7 +2787,7 @@ pub async fn mark_backfill_in_subject(
         })
         .collect();
 
-    let mut to_mark: Vec<u64> = Vec::new();
+    let mut matched: Vec<(i64, u64, u64)> = Vec::new();
     let mut claimed_ids: std::collections::HashSet<u64> =
         std::collections::HashSet::new();
 
@@ -2898,27 +2867,66 @@ pub async fn mark_backfill_in_subject(
             }
         }
         claimed_ids.insert(ep.id);
+        matched.push((*index, ep.id, ep.sort as u64));
+    }
 
-        outcome.consumed.push(*index);
-        let already = user_eps
-            .get(&(ep.sort as u64))
-            .map(|s| s.watched)
-            .unwrap_or(false);
+    // Nothing in `pending` belongs to this subject: return without touching
+    // the user's collection so an unrelated subject is never added as Watching.
+    if matched.is_empty() {
+        return Ok(outcome);
+    }
+
+    let user_eps = api
+        .get_user_eps_collection(subject_id)
+        .await
+        .unwrap_or_default();
+
+    let mut to_mark: Vec<u64> = Vec::new();
+    for (index, ep_id, ep_sort) in matched {
+        outcome.consumed.push(index);
+        let already =
+            user_eps.get(&ep_sort).map(|s| s.watched).unwrap_or(false);
         if already {
             debug!(
                 subject_id,
-                index,
-                ep_id = ep.id,
-                "bangumi: backfill already watched, skip"
+                index, ep_id, "bangumi: backfill already watched, skip"
             );
         } else {
-            to_mark.push(ep.id);
+            to_mark.push(ep_id);
         }
     }
 
     to_mark.sort_unstable();
     to_mark.dedup();
     if !to_mark.is_empty() {
+        // Ensure the subject is collected only when we actually have episodes
+        // to mark. A subject already marked Watched (2) is left as-is.
+        match api.get_subject_collection(subject_id).await? {
+            None => {
+                info!(
+                    "bangumi: subject {subject_id} not collected, adding as Watching"
+                );
+                api.add_collection_subject(
+                    subject_id,
+                    CollectionState::Watching,
+                )
+                .await?;
+            }
+            Some(ref c) => match c.get("type").and_then(|t| t.as_u64()) {
+                Some(1) | Some(4) => {
+                    info!(
+                        "bangumi: subject {subject_id} marked as Wish or OnHold, \
+                         upgrading to Watching"
+                    );
+                    api.add_collection_subject(
+                        subject_id,
+                        CollectionState::Watching,
+                    )
+                    .await?;
+                }
+                _ => {}
+            },
+        }
         api.mark_episodes_watched(subject_id, &to_mark).await?;
         info!(
             subject_id,
@@ -3713,6 +3721,53 @@ mod tests {
         let server = MockServer::start().await;
         let api = make_api(&server).await;
         let out = mark_backfill_in_subject(&api, 402, &[], 0).await.unwrap();
+        assert!(out.consumed.is_empty());
+        assert!(out.marked.is_empty());
+    }
+
+    #[tokio::test]
+    async fn mark_backfill_unmatched_pending_does_not_collect_subject() {
+        let server = MockServer::start().await;
+
+        // Subject 403 holds episodes 22..23 only.
+        Mock::given(method("GET"))
+            .and(path("/episodes"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(
+                serde_json::json!({
+                    "total": 2,
+                    "data": [
+                        { "id": 2201, "sort": 22.0, "ep": 22.0,
+                          "date": "2021-11-14" },
+                        { "id": 2301, "sort": 23.0, "ep": 23.0,
+                          "date": "2021-11-21" },
+                    ],
+                }),
+            ))
+            .expect(1)
+            .mount(&server)
+            .await;
+        // Must NOT touch user collection or mark episodes when nothing matches.
+        Mock::given(method("POST"))
+            .and(path("/users/-/collections/403"))
+            .respond_with(ResponseTemplate::new(202))
+            .expect(0)
+            .mount(&server)
+            .await;
+        Mock::given(method("PATCH"))
+            .and(path("/users/-/collections/403/episodes"))
+            .respond_with(ResponseTemplate::new(204))
+            .expect(0)
+            .mount(&server)
+            .await;
+
+        let api = make_api(&server).await;
+        let pending = vec![
+            (9, Some("2020-08-29".to_owned())),
+            (10, Some("2020-09-05".to_owned())),
+        ];
+        let out = mark_backfill_in_subject(&api, 403, &pending, 0)
+            .await
+            .unwrap();
         assert!(out.consumed.is_empty());
         assert!(out.marked.is_empty());
     }
